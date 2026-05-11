@@ -194,135 +194,121 @@
 
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-300 bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black z-50 text-center min-w-[300px] border-4 border-blue-600"></div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+   <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
+
     <script>
-  const firebaseConfig = {
-  apiKey: "AIzaSyBFCmkqnOiDWc5xvPct69euRqVWsbnbYAM",
-  authDomain: "mlb-coop.firebaseapp.com",
-  projectId: "mlb-coop",
-  storageBucket: "mlb-coop.firebasestorage.app",
-  messagingSenderId: "154154026747",
-  appId: "1:154154026747:web:845a3314288d82dfa3125e",
-  measurementId: "G-FL61M9P4QQ"
-  databaseURL: "https://mlb-coop-default-rtdb.firebaseio.com"
-};
+        // 2. Tu Configuración (Corregida con la coma y el databaseURL)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFCmkqnOiDWc5xvPct69euRqVWsbnbYAM",
+            authDomain: "mlb-coop.firebaseapp.com",
+            projectId: "mlb-coop",
+            storageBucket: "mlb-coop.firebasestorage.app",
+            messagingSenderId: "154154026747",
+            appId: "1:154154026747:web:845a3314288d82dfa3125e",
+            measurementId: "G-FL61M9P4QQ",
+            databaseURL: "https://mlb-coop-default-rtdb.firebaseio.com"
+        };
+
+        // 3. Inicializar conexión
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        let players = JSON.parse(localStorage.getItem('mlb_players_v9')) || [];
+
+        // 4. Variables de juego
+        let players = [];
         let isGameActive = false;
         let currentGameScore = { runs: 0, allowed: 0, hits: 0, pitchOuts: 0, batOuts: 0 };
 
-        // Sprites animados de He-Man y Skeletor
         const SPRITES = {
             heman: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKpXXqZ7XmN4gPS/giphy.gif",
             skeletor: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKpN3vV8hR8v98Y/giphy.gif"
         };
 
-        function init() {
-            renderPlayers();
-            updateDropdowns();
-            renderStats();
-            viewSection('game');
+        // --- SISTEMA DE GUARDADO Y SINCRONIZACIÓN ---
+        function save() {
+            db.ref('gameData').set({
+                players: players,
+                score: currentGameScore,
+                isGameActive: isGameActive
+            });
         }
+
+        db.ref('gameData').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                if (data.score && data.score.runs > currentGameScore.runs) showHR();
+                players = data.players || [];
+                currentGameScore = data.score || currentGameScore;
+                isGameActive = data.isGameActive || false;
+
+                updateScoreboard();
+                updateOutsVisual();
+                updateDropdowns();
+                renderPlayers();
+                
+                // Activar/Desactivar botones si el juego está en vivo
+                const controls = document.getElementById('game-controls');
+                if(isGameActive) {
+                    controls.classList.remove('opacity-30', 'pointer-events-none');
+                    document.getElementById('game-btn-text').innerText = "FINALIZAR PARTIDO";
+                    document.getElementById('btn-toggle-game').classList.replace('bg-green-600', 'bg-red-600');
+                    document.getElementById('game-status-indicator').innerText = "• PARTIDO EN VIVO •";
+                } else {
+                    controls.classList.add('opacity-30', 'pointer-events-none');
+                    document.getElementById('game-btn-text').innerText = "EMPEZAR PARTIDO";
+                    document.getElementById('btn-toggle-game').classList.replace('bg-red-600', 'bg-green-600');
+                    document.getElementById('game-status-indicator').innerText = "ESPERANDO PARTIDO";
+                }
+            }
+        });
+
+        // --- FUNCIONES DE NAVEGACIÓN ---
+        function init() { viewSection('game'); }
 
         function viewSection(sectionId) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
             document.getElementById('section-' + sectionId).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-blue-600', 'text-white'));
+            document.getElementById('nav-' + sectionId).classList.add('bg-blue-600', 'text-white');
+            
             if(sectionId === 'stats') renderStats();
         }
-// Esto escucha a Firebase y actualiza los botones de todos
-db.ref('gameData').on('value', (snapshot) => {
-    const data = snapshot.val();
-    if (data) {
-        // Si alguien anotó un HR en otro celular, mostramos la animación
-        if (data.score && data.score.runs > currentGameScore.runs) {
-            showHR();
-        }
-        players = data.players || [];
-        currentGameScore = data.score || currentGameScore;
 
-        // Refrescar visualmente el juego
-        updateScoreboard();
-        updateOutsVisual();
-        updateDropdowns();
-        renderPlayers();
-    }
-});
-        // Función para mostrar muñequitos en Juego
-        function updateCharacters() {
-            const bId = document.getElementById('activeBatter').value;
-            const pId = document.getElementById('activePitcher').value;
-            const bName = players.find(p => p.id == bId)?.name.toLowerCase() || "";
-            const pName = players.find(p => p.id == pId)?.name.toLowerCase() || "";
-            
-            const bCont = document.getElementById('batter-sprite-container');
-            const pCont = document.getElementById('pitcher-sprite-container');
-            
-            // Lógica He-Man (Beto)
-            if(bName.includes("beto")) bCont.innerHTML = `<img src="${SPRITES.heman}" class="character-sprite" title="He-Man">`;
-            else if(bName.includes("nasa")) bCont.innerHTML = `<img src="${SPRITES.skeletor}" class="character-sprite" title="Skeletor">`;
-            else bCont.innerHTML = "";
-
-            // Lógica Skeletor (Nasa)
-            if(pName.includes("nasa")) pCont.innerHTML = `<img src="${SPRITES.skeletor}" class="character-sprite" title="Skeletor">`;
-            else if(pName.includes("beto")) pCont.innerHTML = `<img src="${SPRITES.heman}" class="character-sprite" title="He-Man">`;
-            else pCont.innerHTML = "";
-        }
-
+        // --- LÓGICA DE BÉISBOL ---
         function toggleGame() {
-    if (!isGameActive) {
-        if(players.length === 0) return showToast("⚠️ ¡Añade jugadores primero!");
-        isGameActive = true;
-        currentGameScore = { runs: 0, allowed: 0, hits: 0, pitchOuts: 0, batOuts: 0 };
-        
-        // Guardamos en Firebase que el juego empezó
-        save(); 
-        
-        updateScoreboard();
-        document.getElementById('game-btn-text').innerText = "FINALIZAR PARTIDO";
-        document.getElementById('game-btn-icon').innerText = "✔️";
-        document.getElementById('btn-toggle-game').classList.replace('bg-green-600', 'bg-red-600');
-        document.getElementById('game-controls').classList.remove('opacity-30', 'pointer-events-none');
-        document.getElementById('game-status-indicator').innerText = "• PARTIDO EN VIVO •";
-        showToast("⚾ ¡PLAY BALL!");
-        updateCharacters();
-    } else {
-        if(confirm("¿Finalizar partido y guardar en el histórico?")) {
-            isGameActive = false;
-            save(); // Guardamos el final
-            location.reload();
-        }
-    }
-}
-
-        function showHR() {
-            const overlay = document.getElementById('hr-overlay');
-            overlay.style.display = 'flex';
-            setTimeout(() => { overlay.style.display = 'none'; }, 3500);
+            if (!isGameActive) {
+                if(players.length === 0) return showToast("⚠️ ¡Añade jugadores primero!");
+                isGameActive = true;
+                currentGameScore = { runs: 0, allowed: 0, hits: 0, pitchOuts: 0, batOuts: 0 };
+                save();
+                showToast("⚾ ¡PLAY BALL!");
+            } else {
+                if(confirm("¿Finalizar partido y guardar estadísticas?")) {
+                    isGameActive = false;
+                    save();
+                }
+            }
         }
 
         function recordBatting(type, color) {
             const pid = document.getElementById('activeBatter').value;
-            if(!pid) return;
+            if(!pid) return showToast("Selecciona un bateador");
             const p = players.find(x => x.id == pid);
 
             if (['H','2B','3B','HR','OUT','K'].includes(type)) p.stats.atBats++;
             if (type === 'H') { p.stats.hits++; currentGameScore.hits++; }
             if (type === '2B') { p.stats.h2b++; p.stats.hits++; currentGameScore.hits++; }
             if (type === '3B') { p.stats.h3b++; p.stats.hits++; currentGameScore.hits++; }
-            if (type === 'HR') { p.stats.hr++; p.stats.hits++; p.stats.rbi++; currentGameScore.runs++; currentGameScore.hits++; showHR(); }
+            if (type === 'HR') { p.stats.hr++; p.stats.hits++; p.stats.rbi++; currentGameScore.runs++; currentGameScore.hits++; }
             if (type === 'BB') p.stats.bb++;
             if (type === 'K') { p.stats.k++; currentGameScore.batOuts++; }
             if (type === 'OUT') currentGameScore.batOuts++;
             if (type === 'RBI') { p.stats.rbi++; currentGameScore.runs++; }
 
             addLog('batting', p.name, type, color);
-            updateScoreboard();
-            updateOutsVisual();
-
             if (currentGameScore.batOuts >= 3) {
-                showToast(`🛑 3 OUTS! CAMBIO DE LADO`);
+                showToast(`🛑 3 OUTS!`);
                 currentGameScore.batOuts = 0;
             } else if (type !== 'RBI' && type !== 'E') {
                 rotateBatter();
@@ -332,7 +318,7 @@ db.ref('gameData').on('value', (snapshot) => {
 
         function recordPitching(type, color) {
             const pid = document.getElementById('activePitcher').value;
-            if(!pid) return;
+            if(!pid) return showToast("Selecciona un pitcher");
             const p = players.find(x => x.id == pid);
 
             if (type === 'K') { p.stats.pk++; currentGameScore.pitchOuts++; }
@@ -342,14 +328,23 @@ db.ref('gameData').on('value', (snapshot) => {
             if (type === 'ER') { p.stats.pruns++; currentGameScore.allowed++; }
 
             addLog('pitching', p.name, type, color);
-            updateScoreboard();
-            updateOutsVisual();
-
             if (currentGameScore.pitchOuts >= 3) {
                 showToast(`✅ INNING TERMINADO!`);
                 rotatePitcher();
             }
             save();
+        }
+
+        function updateCharacters() {
+            const bId = document.getElementById('activeBatter').value;
+            const pId = document.getElementById('activePitcher').value;
+            const bName = players.find(p => p.id == bId)?.name.toLowerCase() || "";
+            const pName = players.find(p => p.id == pId)?.name.toLowerCase() || "";
+            const bCont = document.getElementById('batter-sprite-container');
+            const pCont = document.getElementById('pitcher-sprite-container');
+            
+            bCont.innerHTML = bName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : bName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : "";
+            pCont.innerHTML = pName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : pName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : "";
         }
 
         function rotateBatter() {
@@ -370,8 +365,8 @@ db.ref('gameData').on('value', (snapshot) => {
             const b = document.getElementById('bat-outs').children;
             const p = document.getElementById('pitch-outs').children;
             for(let i=0; i<3; i++) {
-                b[i].style.backgroundColor = i < currentGameScore.batOuts ? '#3b82f6' : '#334155';
-                p[i].style.backgroundColor = i < currentGameScore.pitchOuts ? '#ef4444' : '#334155';
+                if(b[i]) b[i].style.backgroundColor = i < currentGameScore.batOuts ? '#3b82f6' : '#334155';
+                if(p[i]) p[i].style.backgroundColor = i < currentGameScore.pitchOuts ? '#ef4444' : '#334155';
             }
         }
 
@@ -390,90 +385,63 @@ db.ref('gameData').on('value', (snapshot) => {
         }
 
         function addPlayer() {
-            const name = document.getElementById('playerNameInput').value.trim();
+            const input = document.getElementById('playerNameInput');
+            const name = input.value.trim();
             if (name) {
                 players.push({ id: Date.now(), name: name, stats: { 
-                    atBats:0, hits:0, h2b:0, h3b:0, hr:0, bb:0, k:0, rbi:0, 
-                    pk:0, pbb:0, pruns:0, phits:0 
+                    atBats:0, hits:0, h2b:0, h3b:0, hr:0, bb:0, k:0, rbi:0, pk:0, pbb:0, pruns:0, phits:0 
                 } });
-                document.getElementById('playerNameInput').value = '';
-                save(); renderPlayers(); updateDropdowns();
+                input.value = '';
+                save();
             }
         }
 
         function renderPlayers() {
             document.getElementById('playerList').innerHTML = players.map(p => `
                 <div class="flex justify-between p-3 bg-slate-800 rounded-xl border border-slate-700">
-                    <span class="font-bold flex items-center gap-2">
-                        ${p.name.toLowerCase().includes('beto') ? '⚔️' : p.name.toLowerCase().includes('nasa') ? '💀' : '👤'} 
-                        ${p.name}
-                    </span>
+                    <span class="font-bold">👤 ${p.name}</span>
                     <button onclick="removePlayer(${p.id})" class="text-red-400">✕</button>
                 </div>
             `).join('');
         }
 
         function updateDropdowns() {
+            const bSelect = document.getElementById('activeBatter');
+            const pSelect = document.getElementById('activePitcher');
+            const valB = bSelect.value;
+            const valP = pSelect.value;
             const html = '<option value="">ELIJE JUGADOR</option>' + players.map(p => `<option value="${p.id}">${p.name.toUpperCase()}</option>`).join('');
-            document.getElementById('activeBatter').innerHTML = html;
-            document.getElementById('activePitcher').innerHTML = html;
+            bSelect.innerHTML = html;
+            pSelect.innerHTML = html;
+            bSelect.value = valB;
+            pSelect.value = valP;
         }
 
         function renderStats() {
             const cont = document.getElementById('statsContainer');
-            cont.innerHTML = players.map(p => {
-                const avg = p.stats.atBats > 0 ? (p.stats.hits / p.stats.atBats).toFixed(3).replace('0.', '.') : ".000";
-                const isBeto = p.name.toLowerCase().includes('beto');
-                const isNasa = p.name.toLowerCase().includes('nasa');
-                
-                return `
-                    <div class="card p-6 border-l-8 ${isBeto ? 'border-yellow-500' : isNasa ? 'border-purple-600' : 'border-blue-500'}">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="text-2xl font-black uppercase italic">${p.name}</h3>
-                                <p class="text-blue-400 font-bold">AVG: ${avg}</p>
-                            </div>
-                            <div class="text-right">
-                                ${isBeto ? '<span class="text-xs bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded font-black">HE-MAN</span>' : isNasa ? '<span class="text-xs bg-purple-500/20 text-purple-500 px-2 py-1 rounded font-black">SKELETOR</span>' : ''}
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="bg-slate-900/50 p-3 rounded-lg">
-                                <h4 class="text-[10px] font-black text-blue-400 uppercase mb-2 border-b border-blue-400/20">BATEO TOTAL</h4>
-                                <div class="space-y-1 text-xs">
-                                    <div class="flex justify-between italic">VB: <span>${p.stats.atBats}</span></div>
-                                    <div class="flex justify-between font-bold">HITS: <span>${p.stats.hits}</span></div>
-                                    <div class="flex justify-between">2B: <span>${p.stats.h2b}</span></div>
-                                    <div class="flex justify-between">3B: <span>${p.stats.h3b}</span></div>
-                                    <div class="flex justify-between text-yellow-500 font-black">HR: <span>${p.stats.hr}</span></div>
-                                    <div class="flex justify-between text-green-400">RBI: <span>${p.stats.rbi}</span></div>
-                                    <div class="flex justify-between">BB: <span>${p.stats.bb}</span></div>
-                                    <div class="flex justify-between text-red-400">K: <span>${p.stats.k}</span></div>
-                                </div>
-                            </div>
-                            <div class="bg-slate-900/50 p-3 rounded-lg">
-                                <h4 class="text-[10px] font-black text-red-500 uppercase mb-2 border-b border-red-500/20">PITCHEO TOTAL</h4>
-                                <div class="space-y-1 text-xs">
-                                    <div class="flex justify-between text-green-400 font-bold">Ks: <span>${p.stats.pk}</span></div>
-                                    <div class="flex justify-between text-red-300">C. Perm: <span>${p.stats.pruns}</span></div>
-                                    <div class="flex justify-between">H Recib: <span>${p.stats.phits}</span></div>
-                                    <div class="flex justify-between">BB: <span>${p.stats.pbb}</span></div>
-                                </div>
-                            </div>
-                        </div>
+            cont.innerHTML = players.map(p => `
+                <div class="card p-6 border-l-8 border-blue-500">
+                    <h3 class="text-xl font-black mb-2">${p.name.toUpperCase()}</h3>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-slate-900 p-2 rounded">HITS: ${p.stats.hits}</div>
+                        <div class="bg-slate-900 p-2 rounded text-yellow-500">HR: ${p.stats.hr}</div>
+                        <div class="bg-slate-900 p-2 rounded text-green-400">Ks: ${p.stats.pk}</div>
+                        <div class="bg-slate-900 p-2 rounded text-red-400">CP: ${p.stats.pruns}</div>
                     </div>
-                `;
-            }).join('');
+                </div>
+            `).join('');
         }
 
-        function removePlayer(id) { players = players.filter(p => p.id !== id); save(); renderPlayers(); updateDropdowns(); }
-        function clearHistory() { if(confirm("¿Deseas resetear todos los datos acumulados?")) { localStorage.clear(); location.reload(); } }
-        function save() { localStorage.setItem('mlb_players_v9', JSON.stringify(players)); }
-        function showToast(m) { 
+        function removePlayer(id) { players = players.filter(p => p.id !== id); save(); }
+        function showHR() { 
+            const o = document.getElementById('hr-overlay'); 
+            o.style.display = 'flex'; 
+            setTimeout(() => o.style.display = 'none', 3500); 
+        }
+        function showToast(m) {
             const t = document.getElementById('toast');
-            t.innerText = m; t.classList.remove('translate-y-24', 'opacity-0'); 
-            setTimeout(() => t.classList.add('translate-y-24', 'opacity-0'), 4000); 
+            t.innerText = m; t.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => t.classList.add('translate-y-24', 'opacity-0'), 3000);
         }
 
         window.onload = init;
