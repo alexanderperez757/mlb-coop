@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLB THE SHOW 26 COOP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; transition: background-color 0.3s; overflow-x: hidden; }
+        .card { background-color: #1e293b; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); transition: all 0.2s; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); }
+        .scoreboard-font { font-family: 'Courier New', Courier, monospace; }
+        
+        /* Animación Home Run */
+        #hr-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        .hr-text {
+            font-size: 5rem;
+            font-weight: 900;
+            color: #fbbf24;
+            text-shadow: 0 0 20px #fbbf24, 0 0 40px #d97706;
+            animation: hr-bounce 0.5s infinite alternate;
+        }
+        @keyframes hr-bounce { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+        .out-dot { width: 14px; height: 14px; border-radius: 9999px; transition: all 0.3s; border: 2px solid rgba(255,255,255,0.1); }
+        
+        /* Personajes Animados */
+        .character-sprite { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+        
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="p-4 md:p-6">
+
+    <!-- Overlay de Home Run Corregido -->
+    <div id="hr-overlay">
+        <div class="hr-text italic">HOME RUN!</div>
+        <div class="mt-4 text-white text-2xl font-bold uppercase tracking-widest">¡HASTA LA LUNA! ⚾✨</div>
+        <!-- Imagen alternativa estable -->
+        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHY5bXF6bjRsczh3eXRhbmZ6eHpsbmR6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l0HlOn6UvV8xL5a6k/giphy.gif" class="mt-6 rounded-lg shadow-2xl border-4 border-yellow-500 w-64 md:w-80" alt="Home Run Animation">
+    </div>
+
+    <div class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">MLB THE SHOW <span class="text-blue-500">26 COOP</span></h1>
+                <p class="text-slate-400 font-medium italic">Beto vs Nasa Edition</p>
+            </div>
+            <div class="flex gap-2 bg-slate-800 p-1 rounded-xl">
+                <button onclick="viewSection('game')" class="nav-btn px-4 py-2 rounded-lg font-semibold transition-all bg-blue-600 text-white" id="nav-game">🎮 Juego</button>
+                <button onclick="viewSection('stats')" class="nav-btn px-4 py-2 rounded-lg font-semibold transition-all text-slate-400" id="nav-stats">📊 Histórico</button>
+                <button onclick="viewSection('setup')" class="nav-btn px-4 py-2 rounded-lg font-semibold transition-all text-slate-400" id="nav-setup">⚙️ Equipo</button>
+            </div>
+        </header>
+
+        <!-- Marcador Vivo -->
+        <div id="live-scoreboard" class="card p-5 mb-6 border-b-4 border-blue-600 flex flex-col md:flex-row justify-between items-center bg-slate-900 gap-6">
+            <div class="flex flex-col gap-3 w-full md:w-auto">
+                <div id="game-status-indicator" class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/50 w-fit">
+                    ESPERANDO PARTIDO
+                </div>
+                <div class="flex gap-8">
+                    <div>
+                        <p class="text-[10px] text-blue-400 font-black uppercase mb-2 tracking-tighter">Outs Bateando</p>
+                        <div id="bat-outs" class="flex gap-2">
+                            <div class="out-dot bg-slate-700"></div>
+                            <div class="out-dot bg-slate-700"></div>
+                            <div class="out-dot bg-slate-700"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-[10px] text-red-500 font-black uppercase mb-2 tracking-tighter">Outs Pitcheando</p>
+                        <div id="pitch-outs" class="flex gap-2">
+                            <div class="out-dot bg-slate-700"></div>
+                            <div class="out-dot bg-slate-700"></div>
+                            <div class="out-dot bg-slate-700"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex gap-8 md:gap-12 items-center bg-slate-800/50 px-8 py-4 rounded-2xl border border-slate-700">
+                <div class="text-center">
+                    <p class="text-[10px] text-blue-400 font-black uppercase mb-1">Anotadas</p>
+                    <span id="score-runs" class="scoreboard-font text-5xl text-white">0</span>
+                </div>
+                <div class="text-slate-600 text-3xl font-black">VS</div>
+                <div class="text-center">
+                    <p class="text-[10px] text-red-500 font-black uppercase mb-1">Permitidas</p>
+                    <span id="score-allowed" class="scoreboard-font text-5xl text-white">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secciones -->
+        <section id="section-game" class="space-y-6">
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-4">
+                <button id="btn-toggle-game" onclick="toggleGame()" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-full font-black text-lg shadow-lg transform transition-all active:scale-95 flex items-center gap-3">
+                    <span id="game-btn-icon">🏏</span> <span id="game-btn-text">EMPEZAR PARTIDO</span> <span id="game-btn-icon-2">🏏</span>
+                </button>
+            </div>
+
+            <div id="game-controls" class="opacity-30 pointer-events-none transition-all duration-300 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Bateo -->
+                <div class="card p-6 border-t-4 border-blue-500 relative">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold flex items-center gap-2">🏏 Lineup de Bateo</h2>
+                        <!-- Espacio para el muñequito -->
+                        <div id="batter-sprite-container" class="h-16 flex items-center"></div>
+                    </div>
+                    <select id="activeBatter" onchange="updateCharacters()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-blue-500">
+                    </select>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="recordBatting('H', '#16a34a')" class="p-3 bg-green-600/20 hover:bg-green-600/40 border border-green-600/50 rounded-lg font-bold text-green-400">1B</button>
+                        <button onclick="recordBatting('2B', '#059669')" class="p-3 bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-600/50 rounded-lg font-bold text-emerald-400">2B</button>
+                        <button onclick="recordBatting('3B', '#ea580c')" class="p-3 bg-orange-600/20 hover:bg-orange-600/40 border border-orange-600/50 rounded-lg font-bold text-orange-400">3B</button>
+                        <button onclick="recordBatting('HR', '#eab308')" class="p-3 bg-yellow-600/20 hover:bg-yellow-600/40 border border-yellow-600/50 rounded-lg font-bold text-yellow-400">HR</button>
+                        <button onclick="recordBatting('BB', '#2563eb')" class="p-3 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-600/50 rounded-lg font-bold text-blue-400">BB</button>
+                        <button onclick="recordBatting('RBI', '#9333ea')" class="p-3 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-600/50 rounded-lg font-bold text-purple-400">RBI</button>
+                        <button onclick="recordBatting('OUT', '#475569')" class="p-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-bold">OUT</button>
+                        <button onclick="recordBatting('K', '#dc2626')" class="p-3 bg-red-600/20 hover:bg-red-600/40 border border-red-600/50 rounded-lg font-bold text-red-400">K</button>
+                        <button onclick="recordBatting('E', '#64748b')" class="p-3 bg-slate-600/20 hover:bg-slate-600/40 border border-slate-600/50 rounded-lg font-bold text-slate-300">ERR</button>
+                    </div>
+                </div>
+
+                <!-- Pitcheo -->
+                <div class="card p-6 border-t-4 border-red-500 relative">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold flex items-center gap-2">⚾ Bullpen</h2>
+                        <!-- Espacio para el muñequito -->
+                        <div id="pitcher-sprite-container" class="h-16 flex items-center"></div>
+                    </div>
+                    <select id="activePitcher" onchange="updateCharacters()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-red-500">
+                    </select>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="recordPitching('K', '#dc2626')" class="p-4 bg-red-600/20 hover:bg-red-600/40 border border-red-600/50 rounded-xl font-bold text-red-400">PONCHE (K)</button>
+                        <button onclick="recordPitching('OUT', '#475569')" class="p-4 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-xl font-bold">OUT (Contacto)</button>
+                        <button onclick="recordPitching('HIT', '#ea580c')" class="p-4 bg-orange-600/20 hover:bg-orange-600/40 border border-orange-600/50 rounded-xl font-bold text-orange-400">HIT RECIBIDO</button>
+                        <button onclick="recordPitching('BB', '#2563eb')" class="p-4 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-600/50 rounded-xl font-bold text-blue-400">CAMINADO (BB)</button>
+                        <button onclick="recordPitching('ER', '#fca5a5')" class="p-4 bg-red-900/40 hover:bg-red-900/60 border border-red-900/50 rounded-xl font-bold text-red-200 col-span-2">CARRERA PERMITIDA</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registro -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card p-5 bg-slate-900/80 border border-blue-900/30">
+                    <h3 class="text-xs font-black text-blue-500 uppercase mb-4">🏏 Historial de Bateo</h3>
+                    <div id="battingEvents" class="space-y-2 max-h-60 overflow-y-auto"></div>
+                </div>
+                <div class="card p-5 bg-slate-900/80 border border-red-900/30">
+                    <h3 class="text-xs font-black text-red-500 uppercase mb-4">⚾ Historial de Pitcheo</h3>
+                    <div id="pitchingEvents" class="space-y-2 max-h-60 overflow-y-auto"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Configuración -->
+        <section id="section-setup" class="hidden">
+            <div class="card p-6 max-w-md mx-auto">
+                <h2 class="text-xl font-bold mb-4 text-center italic">Gestionar Equipo</h2>
+                <div class="flex gap-2 mb-6">
+                    <input type="text" id="playerNameInput" placeholder="Nombre (ej: Beto o Nasa)..." class="flex-1 p-3 rounded-lg bg-slate-800 border border-slate-700 text-white">
+                    <button onclick="addPlayer()" class="btn-primary px-5 py-2 rounded-lg font-black">AÑADIR</button>
+                </div>
+                <div id="playerList" class="space-y-2"></div>
+                <button onclick="clearHistory()" class="mt-8 text-red-500 text-xs font-black block mx-auto">BORRAR TODO EL HISTORIAL</button>
+            </div>
+        </section>
+
+        <!-- Estadísticas Históricas -->
+        <section id="section-stats" class="hidden space-y-6">
+            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-blue-600 pb-2">Histórico de Estadísticas</h2>
+            <div id="statsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+        </section>
+    </div>
+
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-300 bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black z-50 text-center min-w-[300px] border-4 border-blue-600"></div>
+
+    <script>
+        let players = JSON.parse(localStorage.getItem('mlb_players_v9')) || [];
+        let isGameActive = false;
+        let currentGameScore = { runs: 0, allowed: 0, hits: 0, pitchOuts: 0, batOuts: 0 };
+
+        // Sprites animados de He-Man y Skeletor
+        const SPRITES = {
+            heman: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKpXXqZ7XmN4gPS/giphy.gif",
+            skeletor: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKpN3vV8hR8v98Y/giphy.gif"
+        };
+
+        function init() {
+            renderPlayers();
+            updateDropdowns();
+            renderStats();
+            viewSection('game');
+        }
+
+        function viewSection(sectionId) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('section-' + sectionId).classList.remove('hidden');
+            if(sectionId === 'stats') renderStats();
+        }
+
+        // Función para mostrar muñequitos en Juego
+        function updateCharacters() {
+            const bId = document.getElementById('activeBatter').value;
+            const pId = document.getElementById('activePitcher').value;
+            const bName = players.find(p => p.id == bId)?.name.toLowerCase() || "";
+            const pName = players.find(p => p.id == pId)?.name.toLowerCase() || "";
+            
+            const bCont = document.getElementById('batter-sprite-container');
+            const pCont = document.getElementById('pitcher-sprite-container');
+            
+            // Lógica He-Man (Beto)
+            if(bName.includes("beto")) bCont.innerHTML = `<img src="${SPRITES.heman}" class="character-sprite" title="He-Man">`;
+            else if(bName.includes("nasa")) bCont.innerHTML = `<img src="${SPRITES.skeletor}" class="character-sprite" title="Skeletor">`;
+            else bCont.innerHTML = "";
+
+            // Lógica Skeletor (Nasa)
+            if(pName.includes("nasa")) pCont.innerHTML = `<img src="${SPRITES.skeletor}" class="character-sprite" title="Skeletor">`;
+            else if(pName.includes("beto")) pCont.innerHTML = `<img src="${SPRITES.heman}" class="character-sprite" title="He-Man">`;
+            else pCont.innerHTML = "";
+        }
+
+        function toggleGame() {
+            if (!isGameActive) {
+                if(players.length === 0) return showToast("⚠️ ¡Añade jugadores primero!");
+                isGameActive = true;
+                currentGameScore = { runs: 0, allowed: 0, hits: 0, pitchOuts: 0, batOuts: 0 };
+                updateScoreboard();
+                document.getElementById('game-btn-text').innerText = "FINALIZAR PARTIDO";
+                document.getElementById('game-btn-icon').innerText = "🏏";
+                document.getElementById('game-btn-icon-2').innerText = "🏏";
+                document.getElementById('btn-toggle-game').classList.replace('bg-green-600', 'bg-red-600');
+                document.getElementById('game-controls').classList.remove('opacity-30', 'pointer-events-none');
+                document.getElementById('game-status-indicator').innerText = "• PARTIDO EN VIVO •";
+                showToast("⚾ ¡PLAY BALL!");
+                updateCharacters();
+            } else {
+                if(confirm("¿Finalizar partido y guardar en el histórico?")) {
+                    isGameActive = false;
+                    save();
+                    location.reload(); 
+                }
+            }
+        }
+
+        function showHR() {
+            const overlay = document.getElementById('hr-overlay');
+            overlay.style.display = 'flex';
+            setTimeout(() => { overlay.style.display = 'none'; }, 3500);
+        }
+
+        function recordBatting(type, color) {
+            const pid = document.getElementById('activeBatter').value;
+            if(!pid) return;
+            const p = players.find(x => x.id == pid);
+
+            if (['H','2B','3B','HR','OUT','K'].includes(type)) p.stats.atBats++;
+            if (type === 'H') { p.stats.hits++; currentGameScore.hits++; }
+            if (type === '2B') { p.stats.h2b++; p.stats.hits++; currentGameScore.hits++; }
+            if (type === '3B') { p.stats.h3b++; p.stats.hits++; currentGameScore.hits++; }
+            if (type === 'HR') { p.stats.hr++; p.stats.hits++; p.stats.rbi++; currentGameScore.runs++; currentGameScore.hits++; showHR(); }
+            if (type === 'BB') p.stats.bb++;
+            if (type === 'K') { p.stats.k++; currentGameScore.batOuts++; }
+            if (type === 'OUT') currentGameScore.batOuts++;
+            if (type === 'RBI') { p.stats.rbi++; currentGameScore.runs++; }
+
+            addLog('batting', p.name, type, color);
+            updateScoreboard();
+            updateOutsVisual();
+
+            if (currentGameScore.batOuts >= 3) {
+                showToast(`🛑 3 OUTS! CAMBIO DE LADO`);
+                currentGameScore.batOuts = 0;
+            } else if (type !== 'RBI' && type !== 'E') {
+                rotateBatter();
+            }
+            save();
+        }
+
+        function recordPitching(type, color) {
+            const pid = document.getElementById('activePitcher').value;
+            if(!pid) return;
+            const p = players.find(x => x.id == pid);
+
+            if (type === 'K') { p.stats.pk++; currentGameScore.pitchOuts++; }
+            if (type === 'OUT') currentGameScore.pitchOuts++;
+            if (type === 'BB') p.stats.pbb++;
+            if (type === 'HIT') p.stats.phits++;
+            if (type === 'ER') { p.stats.pruns++; currentGameScore.allowed++; }
+
+            addLog('pitching', p.name, type, color);
+            updateScoreboard();
+            updateOutsVisual();
+
+            if (currentGameScore.pitchOuts >= 3) {
+                showToast(`✅ INNING TERMINADO!`);
+                rotatePitcher();
+            }
+            save();
+        }
+
+        function rotateBatter() {
+            const s = document.getElementById('activeBatter');
+            if (s.options.length > 1) s.selectedIndex = (s.selectedIndex % (s.options.length - 1)) + 1;
+            updateCharacters();
+        }
+
+        function rotatePitcher() {
+            const s = document.getElementById('activePitcher');
+            if (s.options.length > 1) s.selectedIndex = (s.selectedIndex % (s.options.length - 1)) + 1;
+            currentGameScore.pitchOuts = 0;
+            updateOutsVisual();
+            updateCharacters();
+        }
+
+        function updateOutsVisual() {
+            const b = document.getElementById('bat-outs').children;
+            const p = document.getElementById('pitch-outs').children;
+            for(let i=0; i<3; i++) {
+                b[i].style.backgroundColor = i < currentGameScore.batOuts ? '#3b82f6' : '#334155';
+                p[i].style.backgroundColor = i < currentGameScore.pitchOuts ? '#ef4444' : '#334155';
+            }
+        }
+
+        function updateScoreboard() {
+            document.getElementById('score-runs').innerText = currentGameScore.runs;
+            document.getElementById('score-allowed').innerText = currentGameScore.allowed;
+        }
+
+        function addLog(panel, name, action, color) {
+            const cont = document.getElementById(panel + 'Events');
+            const el = document.createElement('div');
+            el.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg border-l-4 mb-2";
+            el.style.borderLeftColor = color;
+            el.innerHTML = `<span class="font-bold text-xs">${name}</span> <span class="text-[10px] px-2 py-0.5 rounded font-black" style="background:${color}33; color:${color}">${action}</span>`;
+            cont.prepend(el);
+        }
+
+        function addPlayer() {
+            const name = document.getElementById('playerNameInput').value.trim();
+            if (name) {
+                players.push({ id: Date.now(), name: name, stats: { 
+                    atBats:0, hits:0, h2b:0, h3b:0, hr:0, bb:0, k:0, rbi:0, 
+                    pk:0, pbb:0, pruns:0, phits:0 
+                } });
+                document.getElementById('playerNameInput').value = '';
+                save(); renderPlayers(); updateDropdowns();
+            }
+        }
+
+        function renderPlayers() {
+            document.getElementById('playerList').innerHTML = players.map(p => `
+                <div class="flex justify-between p-3 bg-slate-800 rounded-xl border border-slate-700">
+                    <span class="font-bold flex items-center gap-2">
+                        ${p.name.toLowerCase().includes('beto') ? '⚔️' : p.name.toLowerCase().includes('nasa') ? '💀' : '👤'} 
+                        ${p.name}
+                    </span>
+                    <button onclick="removePlayer(${p.id})" class="text-red-400">✕</button>
+                </div>
+            `).join('');
+        }
+
+        function updateDropdowns() {
+            const html = '<option value="">ELIJE JUGADOR</option>' + players.map(p => `<option value="${p.id}">${p.name.toUpperCase()}</option>`).join('');
+            document.getElementById('activeBatter').innerHTML = html;
+            document.getElementById('activePitcher').innerHTML = html;
+        }
+
+        function renderStats() {
+            const cont = document.getElementById('statsContainer');
+            cont.innerHTML = players.map(p => {
+                const avg = p.stats.atBats > 0 ? (p.stats.hits / p.stats.atBats).toFixed(3).replace('0.', '.') : ".000";
+                const isBeto = p.name.toLowerCase().includes('beto');
+                const isNasa = p.name.toLowerCase().includes('nasa');
+                
+                return `
+                    <div class="card p-6 border-l-8 ${isBeto ? 'border-yellow-500' : isNasa ? 'border-purple-600' : 'border-blue-500'}">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-2xl font-black uppercase italic">${p.name}</h3>
+                                <p class="text-blue-400 font-bold">AVG: ${avg}</p>
+                            </div>
+                            <div class="text-right">
+                                ${isBeto ? '<span class="text-xs bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded font-black">HE-MAN</span>' : isNasa ? '<span class="text-xs bg-purple-500/20 text-purple-500 px-2 py-1 rounded font-black">SKELETOR</span>' : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-slate-900/50 p-3 rounded-lg">
+                                <h4 class="text-[10px] font-black text-blue-400 uppercase mb-2 border-b border-blue-400/20">BATEO TOTAL</h4>
+                                <div class="space-y-1 text-xs">
+                                    <div class="flex justify-between italic">VB: <span>${p.stats.atBats}</span></div>
+                                    <div class="flex justify-between font-bold">HITS: <span>${p.stats.hits}</span></div>
+                                    <div class="flex justify-between">2B: <span>${p.stats.h2b}</span></div>
+                                    <div class="flex justify-between">3B: <span>${p.stats.h3b}</span></div>
+                                    <div class="flex justify-between text-yellow-500 font-black">HR: <span>${p.stats.hr}</span></div>
+                                    <div class="flex justify-between text-green-400">RBI: <span>${p.stats.rbi}</span></div>
+                                    <div class="flex justify-between">BB: <span>${p.stats.bb}</span></div>
+                                    <div class="flex justify-between text-red-400">K: <span>${p.stats.k}</span></div>
+                                </div>
+                            </div>
+                            <div class="bg-slate-900/50 p-3 rounded-lg">
+                                <h4 class="text-[10px] font-black text-red-500 uppercase mb-2 border-b border-red-500/20">PITCHEO TOTAL</h4>
+                                <div class="space-y-1 text-xs">
+                                    <div class="flex justify-between text-green-400 font-bold">Ks: <span>${p.stats.pk}</span></div>
+                                    <div class="flex justify-between text-red-300">C. Perm: <span>${p.stats.pruns}</span></div>
+                                    <div class="flex justify-between">H Recib: <span>${p.stats.phits}</span></div>
+                                    <div class="flex justify-between">BB: <span>${p.stats.pbb}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function removePlayer(id) { players = players.filter(p => p.id !== id); save(); renderPlayers(); updateDropdowns(); }
+        function clearHistory() { if(confirm("¿Deseas resetear todos los datos acumulados?")) { localStorage.clear(); location.reload(); } }
+        function save() { localStorage.setItem('mlb_players_v9', JSON.stringify(players)); }
+        function showToast(m) { 
+            const t = document.getElementById('toast');
+            t.innerText = m; t.classList.remove('translate-y-24', 'opacity-0'); 
+            setTimeout(() => t.classList.add('translate-y-24', 'opacity-0'), 4000); 
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
