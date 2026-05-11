@@ -194,7 +194,21 @@
 
     <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-300 bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black z-50 text-center min-w-[300px] border-4 border-blue-600"></div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
     <script>
+  const firebaseConfig = {
+  apiKey: "AIzaSyBFCmkqnOiDWc5xvPct69euRqVWsbnbYAM",
+  authDomain: "mlb-coop.firebaseapp.com",
+  projectId: "mlb-coop",
+  storageBucket: "mlb-coop.firebasestorage.app",
+  messagingSenderId: "154154026747",
+  appId: "1:154154026747:web:845a3314288d82dfa3125e",
+  measurementId: "G-FL61M9P4QQ"
+  databaseURL: "https://mlb-coop-default-rtdb.firebaseio.com"
+};
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
         let players = JSON.parse(localStorage.getItem('mlb_players_v9')) || [];
         let isGameActive = false;
         let currentGameScore = { runs: 0, allowed: 0, hits: 0, pitchOuts: 0, batOuts: 0 };
