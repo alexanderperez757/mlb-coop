@@ -391,8 +391,12 @@
                 players.push({ id: Date.now(), name: name, stats: { 
                     atBats:0, hits:0, h2b:0, h3b:0, hr:0, bb:0, k:0, rbi:0, pk:0, pbb:0, pruns:0, phits:0 
                 } });
-                input.value = '';
-                save();
+                // --- ESTAS DOS LÍNEAS SON EL TRUCO ---
+                renderPlayers();   // Actualiza la lista en "Equipo"
+                updateDropdowns(); // ¡ESTA activa los nombres en la pestaña "Juego"!
+                // -------------------------------------
+                
+                save(); // Envía a la nube
             }
         }
 
