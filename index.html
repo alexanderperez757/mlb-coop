@@ -263,7 +263,11 @@
         });
 
         // --- FUNCIONES DE NAVEGACIÓN ---
-        function init() { viewSection('game'); }
+        function init() { 
+            renderPlayers();
+            updateDropdowns();
+            viewSection('game'); 
+        }
 
         function viewSection(sectionId) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
@@ -293,8 +297,9 @@
 
         function recordBatting(type, color) {
             const pid = document.getElementById('activeBatter').value;
-            if(!pid) return showToast("Selecciona un bateador");
+            if(!pid) return showToast("⚠️ Selecciona un bateador");
             const p = players.find(x => x.id == pid);
+            if(!p) return;
 
             if (['H','2B','3B','HR','OUT','K'].includes(type)) p.stats.atBats++;
             if (type === 'H') { p.stats.hits++; currentGameScore.hits++; }
@@ -307,19 +312,25 @@
             if (type === 'RBI') { p.stats.rbi++; currentGameScore.runs++; }
 
             addLog('batting', p.name, type, color);
+            
+            // Actualización visual inmediata antes de guardar
+            updateScoreboard();
+            updateOutsVisual();
+
             if (currentGameScore.batOuts >= 3) {
                 showToast(`🛑 3 OUTS!`);
                 currentGameScore.batOuts = 0;
             } else if (type !== 'RBI' && type !== 'E') {
                 rotateBatter();
             }
-            save();
+            save(); // Envía a Firebase
         }
 
         function recordPitching(type, color) {
-            const pid = document.getElementById('activePitcher').value;
-            if(!pid) return showToast("Selecciona un pitcher");
+         const pid = document.getElementById('activePitcher').value;
+            if(!pid) return showToast("⚠️ Selecciona un pitcher");
             const p = players.find(x => x.id == pid);
+            if(!p) return;
 
             if (type === 'K') { p.stats.pk++; currentGameScore.pitchOuts++; }
             if (type === 'OUT') currentGameScore.pitchOuts++;
@@ -328,11 +339,16 @@
             if (type === 'ER') { p.stats.pruns++; currentGameScore.allowed++; }
 
             addLog('pitching', p.name, type, color);
+            
+            // Actualización visual inmediata
+            updateScoreboard();
+            updateOutsVisual();
+
             if (currentGameScore.pitchOuts >= 3) {
                 showToast(`✅ INNING TERMINADO!`);
                 rotatePitcher();
             }
-            save();
+            save(); // Envía a Firebase
         }
 
         function updateCharacters() {
