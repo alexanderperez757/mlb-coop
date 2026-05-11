@@ -231,7 +231,24 @@
             document.getElementById('section-' + sectionId).classList.remove('hidden');
             if(sectionId === 'stats') renderStats();
         }
+// Esto escucha a Firebase y actualiza los botones de todos
+db.ref('gameData').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+        // Si alguien anotó un HR en otro celular, mostramos la animación
+        if (data.score && data.score.runs > currentGameScore.runs) {
+            showHR();
+        }
+        players = data.players || [];
+        currentGameScore = data.score || currentGameScore;
 
+        // Refrescar visualmente el juego
+        updateScoreboard();
+        updateOutsVisual();
+        updateDropdowns();
+        renderPlayers();
+    }
+});
         // Función para mostrar muñequitos en Juego
         function updateCharacters() {
             const bId = document.getElementById('activeBatter').value;
@@ -254,27 +271,30 @@
         }
 
         function toggleGame() {
-            if (!isGameActive) {
-                if(players.length === 0) return showToast("⚠️ ¡Añade jugadores primero!");
-                isGameActive = true;
-                currentGameScore = { runs: 0, allowed: 0, hits: 0, pitchOuts: 0, batOuts: 0 };
-                updateScoreboard();
-                document.getElementById('game-btn-text').innerText = "FINALIZAR PARTIDO";
-                document.getElementById('game-btn-icon').innerText = "🏏";
-                document.getElementById('game-btn-icon-2').innerText = "🏏";
-                document.getElementById('btn-toggle-game').classList.replace('bg-green-600', 'bg-red-600');
-                document.getElementById('game-controls').classList.remove('opacity-30', 'pointer-events-none');
-                document.getElementById('game-status-indicator').innerText = "• PARTIDO EN VIVO •";
-                showToast("⚾ ¡PLAY BALL!");
-                updateCharacters();
-            } else {
-                if(confirm("¿Finalizar partido y guardar en el histórico?")) {
-                    isGameActive = false;
-                    save();
-                    location.reload(); 
-                }
-            }
+    if (!isGameActive) {
+        if(players.length === 0) return showToast("⚠️ ¡Añade jugadores primero!");
+        isGameActive = true;
+        currentGameScore = { runs: 0, allowed: 0, hits: 0, pitchOuts: 0, batOuts: 0 };
+        
+        // Guardamos en Firebase que el juego empezó
+        save(); 
+        
+        updateScoreboard();
+        document.getElementById('game-btn-text').innerText = "FINALIZAR PARTIDO";
+        document.getElementById('game-btn-icon').innerText = "✔️";
+        document.getElementById('btn-toggle-game').classList.replace('bg-green-600', 'bg-red-600');
+        document.getElementById('game-controls').classList.remove('opacity-30', 'pointer-events-none');
+        document.getElementById('game-status-indicator').innerText = "• PARTIDO EN VIVO •";
+        showToast("⚾ ¡PLAY BALL!");
+        updateCharacters();
+    } else {
+        if(confirm("¿Finalizar partido y guardar en el histórico?")) {
+            isGameActive = false;
+            save(); // Guardamos el final
+            location.reload();
         }
+    }
+}
 
         function showHR() {
             const overlay = document.getElementById('hr-overlay');
