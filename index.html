@@ -115,7 +115,7 @@
                         <h2 class="text-xl font-bold">🏏 Lineup de Bateo</h2>
                         <div id="batter-sprite-container" class="h-16 flex items-center"></div>
                     </div>
-                    <select id="activeBatter" onchange="updateCharacters()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-blue-500"></select>
+                    <select id="activeBatter" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-blue-500"></select>
                     <div class="grid grid-cols-3 gap-2">
                         <button onclick="recordBatting('H', '#16a34a')" class="p-3 bg-green-600/20 hover:bg-green-600/40 border border-green-600/50 rounded-lg font-bold text-green-400">1B</button>
                         <button onclick="recordBatting('2B', '#059669')" class="p-3 bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-600/50 rounded-lg font-bold text-emerald-400">2B</button>
@@ -134,7 +134,7 @@
                         <h2 class="text-xl font-bold">⚾ Bullpen</h2>
                         <div id="pitcher-sprite-container" class="h-16 flex items-center"></div>
                     </div>
-                    <select id="activePitcher" onchange="updateCharacters()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-red-500"></select>
+                    <select id="activePitcher" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-red-500"></select>
                     <div class="grid grid-cols-2 gap-2">
                         <button onclick="recordPitching('K', '#dc2626')" class="p-4 bg-red-600/20 hover:bg-red-600/40 border border-red-600/50 rounded-xl font-bold text-red-400">PONCHE (K)</button>
                         <button onclick="recordPitching('OUT', '#475569')" class="p-4 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-xl font-bold">OUT (Contacto)</button>
@@ -199,6 +199,7 @@
         let isGameActive = false;
         let currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0 };
         let historyLogs = { batting: [], pitching: [] };
+        let activeSelection = { batterId: "", pitcherId: "" };
 
         const SPRITES = {
             heman: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9iZCZjdD1z/3o7TKpXXqZ7XmN4gPS/giphy.gif",
@@ -210,7 +211,8 @@
                 players,
                 score: currentGameScore,
                 isGameActive,
-                logs: historyLogs
+                logs: historyLogs,
+                activeSelection
             });
         }
 
@@ -221,8 +223,8 @@
                 currentGameScore = data.score || { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0 };
                 isGameActive = data.isGameActive || false;
                 historyLogs = data.logs || { batting: [], pitching: [] };
+                activeSelection = data.activeSelection || { batterId: "", pitcherId: "" };
                 
-                // Asegurar que las listas de logs existan para evitar errores de renderizado
                 if(!historyLogs.batting) historyLogs.batting = [];
                 if(!historyLogs.pitching) historyLogs.pitching = [];
                 
@@ -249,11 +251,29 @@
             updateCharacters();
         }
 
+        function rotatePlayer(type) {
+            if (players.length < 2) return;
+            const selectId = type === 'batter' ? 'activeBatter' : 'activePitcher';
+            const currentId = activeSelection[type === 'batter' ? 'batterId' : 'pitcherId'];
+            
+            let currentIndex = players.findIndex(p => p.id == currentId);
+            let nextIndex = (currentIndex + 1) % players.length;
+            
+            activeSelection[type === 'batter' ? 'batterId' : 'pitcherId'] = players[nextIndex].id;
+        }
+
+        function manualUserChange() {
+            activeSelection.batterId = document.getElementById('activeBatter').value;
+            activeSelection.pitcherId = document.getElementById('activePitcher').value;
+            save();
+        }
+
         function recordBatting(type, color) {
-            const pid = document.getElementById('activeBatter').value;
+            const pid = activeSelection.batterId;
             if(!pid) return showToast("⚠️ Selecciona un bateador");
             const p = players.find(x => x.id == pid);
             
+            // Stats
             if (['H','2B','3B','HR','OUT','K'].includes(type)) p.stats.atBats++;
             if (['H','2B','3B','HR'].includes(type)) p.stats.hits++;
             if (type === 'HR') { p.stats.hr++; p.stats.rbi++; currentGameScore.runs++; showHR(); }
@@ -261,6 +281,11 @@
             if (type === 'OUT' || type === 'K') currentGameScore.batOuts++;
 
             addLog('batting', p.name, type, color);
+
+            // Rotar bateador AUTOMÁTICAMENTE excepto si es RBI
+            if (type !== 'RBI') {
+                rotatePlayer('batter');
+            }
 
             if (currentGameScore.batOuts >= 3) {
                 showToast("🛑 3 OUTS - CAMBIO");
@@ -270,7 +295,7 @@
         }
 
         function recordPitching(type, color) {
-            const pid = document.getElementById('activePitcher').value;
+            const pid = activeSelection.pitcherId;
             if(!pid) return showToast("⚠️ Selecciona un pitcher");
             const p = players.find(x => x.id == pid);
 
@@ -281,44 +306,34 @@
             addLog('pitching', p.name, type, color);
 
             if (currentGameScore.pitchOuts >= 3) {
-                showToast("✅ INNING TERMINADO");
+                showToast("✅ INNING TERMINADO - ROTA PITCHER");
                 currentGameScore.pitchOuts = 0;
+                rotatePlayer('pitcher'); // Rotar pitcher automáticamente tras 3 outs
             }
             save();
         }
 
         function addLog(side, name, type, color) {
-            const log = { 
-                name, 
-                type, 
-                color, 
-                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
-            };
-            
-            // Verificación de seguridad
-            if (!historyLogs) historyLogs = { batting: [], pitching: [] };
+            const log = { name, type, color, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
             if (!historyLogs[side]) historyLogs[side] = [];
-            
             historyLogs[side].unshift(log);
             if (historyLogs[side].length > 15) historyLogs[side].pop();
         }
 
         function renderLogs() {
-            const bHtml = (historyLogs.batting || []).map(l => `
+            document.getElementById('battingEvents').innerHTML = (historyLogs.batting || []).map(l => `
                 <div class="flex justify-between p-2 bg-slate-800 rounded border-l-4 mb-1" style="border-color: ${l.color}">
                     <span class="font-bold">${l.name}</span>
                     <span class="font-black" style="color: ${l.color}">${l.type}</span>
                 </div>
             `).join('');
-            document.getElementById('battingEvents').innerHTML = bHtml;
 
-            const pHtml = (historyLogs.pitching || []).map(l => `
+            document.getElementById('pitchingEvents').innerHTML = (historyLogs.pitching || []).map(l => `
                 <div class="flex justify-between p-2 bg-slate-800 rounded border-l-4 mb-1" style="border-color: ${l.color}">
                     <span class="font-bold">${l.name}</span>
                     <span class="font-black" style="color: ${l.color}">${l.type}</span>
                 </div>
             `).join('');
-            document.getElementById('pitchingEvents').innerHTML = pHtml;
         }
 
         function renderStats() {
@@ -345,28 +360,22 @@
         function updateDropdowns() {
             const bSelect = document.getElementById('activeBatter');
             const pSelect = document.getElementById('activePitcher');
-            const bVal = bSelect.value;
-            const pVal = pSelect.value;
             
             const options = '<option value="">ELIJE JUGADOR</option>' + players.map(p => `<option value="${p.id}">${p.name.toUpperCase()}</option>`).join('');
             
             bSelect.innerHTML = options;
             pSelect.innerHTML = options;
-            if(bVal) bSelect.value = bVal;
-            if(pVal) pSelect.value = pVal;
+            
+            if(activeSelection.batterId) bSelect.value = activeSelection.batterId;
+            if(activeSelection.pitcherId) pSelect.value = activeSelection.pitcherId;
         }
 
         function updateCharacters() {
-            const bId = document.getElementById('activeBatter').value;
-            const pId = document.getElementById('activePitcher').value;
-            const bName = (players.find(p => p.id == bId)?.name || "").toLowerCase();
-            const pName = (players.find(p => p.id == pId)?.name || "").toLowerCase();
+            const bName = (players.find(p => p.id == activeSelection.batterId)?.name || "").toLowerCase();
+            const pName = (players.find(p => p.id == activeSelection.pitcherId)?.name || "").toLowerCase();
             
-            const bCont = document.getElementById('batter-sprite-container');
-            const pCont = document.getElementById('pitcher-sprite-container');
-
-            bCont.innerHTML = bName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : (bName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : "");
-            pCont.innerHTML = pName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : (pName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : "");
+            document.getElementById('batter-sprite-container').innerHTML = bName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : (bName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : "");
+            document.getElementById('pitcher-sprite-container').innerHTML = pName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : (pName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : "");
         }
 
         function toggleGame() {
@@ -374,7 +383,9 @@
                 if (players.length === 0) return showToast("⚠️ ¡Añade jugadores!");
                 isGameActive = true;
                 currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0 };
-                historyLogs = { batting: [], pitching: [] }; // Reiniciar logs al empezar
+                historyLogs = { batting: [], pitching: [] };
+                // Seleccionar primeros jugadores por defecto
+                activeSelection = { batterId: players[0].id, pitcherId: players[0].id };
             } else {
                 if (!confirm("¿Finalizar partido?")) return;
                 isGameActive = false;
@@ -406,11 +417,7 @@
             const input = document.getElementById('playerNameInput');
             const name = input.value.trim();
             if (name) {
-                players.push({ 
-                    id: Date.now(), 
-                    name, 
-                    stats: { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0 } 
-                });
+                players.push({ id: Date.now(), name, stats: { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0 } });
                 input.value = '';
                 save();
             }
@@ -440,6 +447,7 @@
                 isGameActive = false;
                 currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0 };
                 historyLogs = { batting: [], pitching: [] };
+                activeSelection = { batterId: "", pitcherId: "" };
                 save();
             }
         }
