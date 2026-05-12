@@ -198,7 +198,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
 
     <script>
-        // 2. Tu Configuración (Corregida con la coma y el databaseURL)
         const firebaseConfig = {
             apiKey: "AIzaSyBFCmkqnOiDWc5xvPct69euRqVWsbnbYAM",
             authDomain: "mlb-coop.firebaseapp.com",
@@ -210,21 +209,19 @@
             databaseURL: "https://mlb-coop-default-rtdb.firebaseio.com"
         };
 
-        // 3. Inicializar conexión
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 4. Variables de juego
         let players = [];
         let isGameActive = false;
         let currentGameScore = { runs: 0, allowed: 0, hits: 0, pitchOuts: 0, batOuts: 0 };
 
         const SPRITES = {
-            heman: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKpXXqZ7XmN4gPS/giphy.gif",
-            skeletor: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKpN3vV8hR8v98Y/giphy.gif"
+            heman: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9iZCZjdD1z/3o7TKpXXqZ7XmN4gPS/giphy.gif",
+            skeletor: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9iZCZjdD1z/3o7TKpN3vV8hR8v98Y/giphy.gif"
         };
 
-        // --- SISTEMA DE GUARDADO Y SINCRONIZACIÓN ---
+        // --- SINCRONIZACIÓN REALTIME ---
         function save() {
             db.ref('gameData').set({
                 players: players,
@@ -236,147 +233,106 @@
         db.ref('gameData').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
-                if (data.score && data.score.runs > currentGameScore.runs) showHR();
                 players = data.players || [];
                 currentGameScore = data.score || currentGameScore;
                 isGameActive = data.isGameActive || false;
-
+                
                 updateScoreboard();
                 updateOutsVisual();
-                updateDropdowns();
+                updateDropdowns(); // ESTO LLENA EL SELECTOR DE JUGADORES
                 renderPlayers();
-                
-                // Activar/Desactivar botones si el juego está en vivo
-                const controls = document.getElementById('game-controls');
-                if(isGameActive) {
-                    controls.classList.remove('opacity-30', 'pointer-events-none');
-                    document.getElementById('game-btn-text').innerText = "FINALIZAR PARTIDO";
-                    document.getElementById('btn-toggle-game').classList.replace('bg-green-600', 'bg-red-600');
-                    document.getElementById('game-status-indicator').innerText = "• PARTIDO EN VIVO •";
-                } else {
-                    controls.classList.add('opacity-30', 'pointer-events-none');
-                    document.getElementById('game-btn-text').innerText = "EMPEZAR PARTIDO";
-                    document.getElementById('btn-toggle-game').classList.replace('bg-red-600', 'bg-green-600');
-                    document.getElementById('game-status-indicator').innerText = "ESPERANDO PARTIDO";
-                }
+                updateStatusUI(); // ESTO ACTIVA EL BOTÓN "EN VIVO"
             }
         });
 
-        // --- FUNCIONES DE NAVEGACIÓN ---
-        function init() { 
-            renderPlayers();
-            updateDropdowns();
-            viewSection('game'); 
+        function updateStatusUI() {
+            const controls = document.getElementById('game-controls');
+            const btn = document.getElementById('btn-toggle-game');
+            if (isGameActive) {
+                controls.classList.remove('opacity-30', 'pointer-events-none');
+                document.getElementById('game-btn-text').innerText = "FINALIZAR PARTIDO";
+                btn.classList.replace('bg-green-600', 'bg-red-600');
+                document.getElementById('game-status-indicator').innerText = "• PARTIDO EN VIVO •";
+            } else {
+                controls.classList.add('opacity-30', 'pointer-events-none');
+                document.getElementById('game-btn-text').innerText = "EMPEZAR PARTIDO";
+                btn.classList.replace('bg-red-600', 'bg-green-600');
+                document.getElementById('game-status-indicator').innerText = "ESPERANDO PARTIDO";
+            }
         }
 
-        function viewSection(sectionId) {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById('section-' + sectionId).classList.remove('hidden');
-            
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-blue-600', 'text-white'));
-            document.getElementById('nav-' + sectionId).classList.add('bg-blue-600', 'text-white');
-            
-            if(sectionId === 'stats') renderStats();
-        }
-
-        // --- LÓGICA DE BÉISBOL ---
         function toggleGame() {
             if (!isGameActive) {
-                if(players.length === 0) return showToast("⚠️ ¡Añade jugadores primero!");
+                if (players.length === 0) return showToast("⚠️ ¡Añade jugadores primero!");
                 isGameActive = true;
                 currentGameScore = { runs: 0, allowed: 0, hits: 0, pitchOuts: 0, batOuts: 0 };
-                save();
-                showToast("⚾ ¡PLAY BALL!");
             } else {
-                if(confirm("¿Finalizar partido y guardar estadísticas?")) {
-                    isGameActive = false;
-                    save();
-                }
+                if (!confirm("¿Finalizar partido?")) return;
+                isGameActive = false;
             }
+            save();
         }
 
+        function updateDropdowns() {
+            const selects = [document.getElementById('activeBatter'), document.getElementById('activePitcher')];
+            selects.forEach(s => {
+                const currentVal = s.value;
+                s.innerHTML = '<option value="">ELIJE JUGADOR</option>' + 
+                    players.map(p => `<option value="${p.id}">${p.name.toUpperCase()}</option>`).join('');
+                s.value = currentVal;
+            });
+        }
+
+        // --- FUNCIONES DE REGISTRO (BAT/PITCH) ---
         function recordBatting(type, color) {
             const pid = document.getElementById('activeBatter').value;
-            if(!pid) return showToast("⚠️ Selecciona un bateador");
+            if(!pid) return showToast("⚠️ Elige un bateador");
             const p = players.find(x => x.id == pid);
-            if(!p) return;
-
+            
             if (['H','2B','3B','HR','OUT','K'].includes(type)) p.stats.atBats++;
             if (type === 'H') { p.stats.hits++; currentGameScore.hits++; }
-            if (type === '2B') { p.stats.h2b++; p.stats.hits++; currentGameScore.hits++; }
-            if (type === '3B') { p.stats.h3b++; p.stats.hits++; currentGameScore.hits++; }
             if (type === 'HR') { p.stats.hr++; p.stats.hits++; p.stats.rbi++; currentGameScore.runs++; currentGameScore.hits++; }
-            if (type === 'BB') p.stats.bb++;
-            if (type === 'K') { p.stats.k++; currentGameScore.batOuts++; }
-            if (type === 'OUT') currentGameScore.batOuts++;
+            if (type === 'OUT' || type === 'K') currentGameScore.batOuts++;
             if (type === 'RBI') { p.stats.rbi++; currentGameScore.runs++; }
 
-            addLog('batting', p.name, type, color);
-            
-            // Actualización visual inmediata antes de guardar
-            updateScoreboard();
-            updateOutsVisual();
-
             if (currentGameScore.batOuts >= 3) {
-                showToast(`🛑 3 OUTS!`);
+                showToast("🛑 3 OUTS!");
                 currentGameScore.batOuts = 0;
-            } else if (type !== 'RBI' && type !== 'E') {
-                rotateBatter();
             }
-            save(); // Envía a Firebase
+            save();
         }
 
         function recordPitching(type, color) {
-         const pid = document.getElementById('activePitcher').value;
-            if(!pid) return showToast("⚠️ Selecciona un pitcher");
+            const pid = document.getElementById('activePitcher').value;
+            if(!pid) return showToast("⚠️ Elige un pitcher");
             const p = players.find(x => x.id == pid);
-            if(!p) return;
 
             if (type === 'K') { p.stats.pk++; currentGameScore.pitchOuts++; }
             if (type === 'OUT') currentGameScore.pitchOuts++;
-            if (type === 'BB') p.stats.pbb++;
-            if (type === 'HIT') p.stats.phits++;
             if (type === 'ER') { p.stats.pruns++; currentGameScore.allowed++; }
 
-            addLog('pitching', p.name, type, color);
-            
-            // Actualización visual inmediata
-            updateScoreboard();
-            updateOutsVisual();
-
             if (currentGameScore.pitchOuts >= 3) {
-                showToast(`✅ INNING TERMINADO!`);
-                rotatePitcher();
+                showToast("✅ INNING!");
+                currentGameScore.pitchOuts = 0;
             }
-            save(); // Envía a Firebase
+            save();
         }
 
-        function updateCharacters() {
-            const bId = document.getElementById('activeBatter').value;
-            const pId = document.getElementById('activePitcher').value;
-            const bName = players.find(p => p.id == bId)?.name.toLowerCase() || "";
-            const pName = players.find(p => p.id == pId)?.name.toLowerCase() || "";
-            const bCont = document.getElementById('batter-sprite-container');
-            const pCont = document.getElementById('pitcher-sprite-container');
-            
-            bCont.innerHTML = bName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : bName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : "";
-            pCont.innerHTML = pName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : pName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : "";
+        function addPlayer() {
+            const input = document.getElementById('playerNameInput');
+            const name = input.value.trim();
+            if (name) {
+                players.push({ id: Date.now(), name: name, stats: { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0 } });
+                input.value = '';
+                save();
+            }
         }
 
-        function rotateBatter() {
-            const s = document.getElementById('activeBatter');
-            if (s.options.length > 1) s.selectedIndex = (s.selectedIndex % (s.options.length - 1)) + 1;
-            updateCharacters();
+        // (Mantén tus funciones visuales: updateScoreboard, updateOutsVisual, renderPlayers, viewSection, showToast)
+        function updateScoreboard() {
+            document.getElementById('score-runs').innerText = currentGameScore.runs;
+            document.getElementById('score-allowed').innerText = currentGameScore.allowed;
         }
-
-        function rotatePitcher() {
-            const s = document.getElementById('activePitcher');
-            if (s.options.length > 1) s.selectedIndex = (s.selectedIndex % (s.options.length - 1)) + 1;
-            currentGameScore.pitchOuts = 0;
-            updateOutsVisual();
-            updateCharacters();
-        }
-
         function updateOutsVisual() {
             const b = document.getElementById('bat-outs').children;
             const p = document.getElementById('pitch-outs').children;
@@ -385,86 +341,26 @@
                 if(p[i]) p[i].style.backgroundColor = i < currentGameScore.pitchOuts ? '#ef4444' : '#334155';
             }
         }
-
-        function updateScoreboard() {
-            document.getElementById('score-runs').innerText = currentGameScore.runs;
-            document.getElementById('score-allowed').innerText = currentGameScore.allowed;
-        }
-
-        function addLog(panel, name, action, color) {
-            const cont = document.getElementById(panel + 'Events');
-            const el = document.createElement('div');
-            el.className = "flex justify-between items-center bg-slate-800 p-2 rounded-lg border-l-4 mb-2";
-            el.style.borderLeftColor = color;
-            el.innerHTML = `<span class="font-bold text-xs">${name}</span> <span class="text-[10px] px-2 py-0.5 rounded font-black" style="background:${color}33; color:${color}">${action}</span>`;
-            cont.prepend(el);
-        }
-
-        function addPlayer() {
-            const input = document.getElementById('playerNameInput');
-            const name = input.value.trim();
-            if (name) {
-                players.push({ id: Date.now(), name: name, stats: { 
-                    atBats:0, hits:0, h2b:0, h3b:0, hr:0, bb:0, k:0, rbi:0, pk:0, pbb:0, pruns:0, phits:0 
-                } });
-                // --- ESTAS DOS LÍNEAS SON EL TRUCO ---
-                renderPlayers();   // Actualiza la lista en "Equipo"
-                updateDropdowns(); // ¡ESTA activa los nombres en la pestaña "Juego"!
-                // -------------------------------------
-                
-                save(); // Envía a la nube
-            }
-        }
-
         function renderPlayers() {
             document.getElementById('playerList').innerHTML = players.map(p => `
-                <div class="flex justify-between p-3 bg-slate-800 rounded-xl border border-slate-700">
-                    <span class="font-bold">👤 ${p.name}</span>
+                <div class="flex justify-between p-3 bg-slate-800 rounded-xl mb-2">
+                    <span>👤 ${p.name}</span>
                     <button onclick="removePlayer(${p.id})" class="text-red-400">✕</button>
                 </div>
             `).join('');
         }
-
-        function updateDropdowns() {
-            const bSelect = document.getElementById('activeBatter');
-            const pSelect = document.getElementById('activePitcher');
-            const valB = bSelect.value;
-            const valP = pSelect.value;
-            const html = '<option value="">ELIJE JUGADOR</option>' + players.map(p => `<option value="${p.id}">${p.name.toUpperCase()}</option>`).join('');
-            bSelect.innerHTML = html;
-            pSelect.innerHTML = html;
-            bSelect.value = valB;
-            pSelect.value = valP;
-        }
-
-        function renderStats() {
-            const cont = document.getElementById('statsContainer');
-            cont.innerHTML = players.map(p => `
-                <div class="card p-6 border-l-8 border-blue-500">
-                    <h3 class="text-xl font-black mb-2">${p.name.toUpperCase()}</h3>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="bg-slate-900 p-2 rounded">HITS: ${p.stats.hits}</div>
-                        <div class="bg-slate-900 p-2 rounded text-yellow-500">HR: ${p.stats.hr}</div>
-                        <div class="bg-slate-900 p-2 rounded text-green-400">Ks: ${p.stats.pk}</div>
-                        <div class="bg-slate-900 p-2 rounded text-red-400">CP: ${p.stats.pruns}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
         function removePlayer(id) { players = players.filter(p => p.id !== id); save(); }
-        function showHR() { 
-            const o = document.getElementById('hr-overlay'); 
-            o.style.display = 'flex'; 
-            setTimeout(() => o.style.display = 'none', 3500); 
+        function viewSection(id) {
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            document.getElementById('section-' + id).classList.remove('hidden');
         }
         function showToast(m) {
             const t = document.getElementById('toast');
-            t.innerText = m; t.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => t.classList.add('translate-y-24', 'opacity-0'), 3000);
+            t.innerText = m; t.classList.remove('opacity-0');
+            setTimeout(() => t.classList.add('opacity-0'), 3000);
         }
 
-        window.onload = init;
+        window.onload = () => viewSection('game');
     </script>
 </body>
 </html>
