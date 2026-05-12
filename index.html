@@ -222,6 +222,10 @@
                 isGameActive = data.isGameActive || false;
                 historyLogs = data.logs || { batting: [], pitching: [] };
                 
+                // Asegurar que las listas de logs existan para evitar errores de renderizado
+                if(!historyLogs.batting) historyLogs.batting = [];
+                if(!historyLogs.pitching) historyLogs.pitching = [];
+                
                 updateUI();
             }
         });
@@ -230,7 +234,6 @@
             document.getElementById('score-runs').innerText = currentGameScore.runs;
             document.getElementById('score-allowed').innerText = currentGameScore.allowed;
             
-            // Outs Visuals
             const bDots = document.getElementById('bat-outs').children;
             const pDots = document.getElementById('pitch-outs').children;
             for(let i=0; i<3; i++) {
@@ -251,7 +254,6 @@
             if(!pid) return showToast("⚠️ Selecciona un bateador");
             const p = players.find(x => x.id == pid);
             
-            // Stats logic
             if (['H','2B','3B','HR','OUT','K'].includes(type)) p.stats.atBats++;
             if (['H','2B','3B','HR'].includes(type)) p.stats.hits++;
             if (type === 'HR') { p.stats.hr++; p.stats.rbi++; currentGameScore.runs++; showHR(); }
@@ -292,14 +294,18 @@
                 color, 
                 time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
             };
-            if(!historyLogs[side]) historyLogs[side] = [];
+            
+            // Verificación de seguridad
+            if (!historyLogs) historyLogs = { batting: [], pitching: [] };
+            if (!historyLogs[side]) historyLogs[side] = [];
+            
             historyLogs[side].unshift(log);
             if (historyLogs[side].length > 15) historyLogs[side].pop();
         }
 
         function renderLogs() {
             const bHtml = (historyLogs.batting || []).map(l => `
-                <div class="flex justify-between p-2 bg-slate-800 rounded border-l-4" style="border-color: ${l.color}">
+                <div class="flex justify-between p-2 bg-slate-800 rounded border-l-4 mb-1" style="border-color: ${l.color}">
                     <span class="font-bold">${l.name}</span>
                     <span class="font-black" style="color: ${l.color}">${l.type}</span>
                 </div>
@@ -307,7 +313,7 @@
             document.getElementById('battingEvents').innerHTML = bHtml;
 
             const pHtml = (historyLogs.pitching || []).map(l => `
-                <div class="flex justify-between p-2 bg-slate-800 rounded border-l-4" style="border-color: ${l.color}">
+                <div class="flex justify-between p-2 bg-slate-800 rounded border-l-4 mb-1" style="border-color: ${l.color}">
                     <span class="font-bold">${l.name}</span>
                     <span class="font-black" style="color: ${l.color}">${l.type}</span>
                 </div>
@@ -368,6 +374,7 @@
                 if (players.length === 0) return showToast("⚠️ ¡Añade jugadores!");
                 isGameActive = true;
                 currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0 };
+                historyLogs = { batting: [], pitching: [] }; // Reiniciar logs al empezar
             } else {
                 if (!confirm("¿Finalizar partido?")) return;
                 isGameActive = false;
