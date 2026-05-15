@@ -3,159 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLB THE SHOW 26 COOP - PRO EDITION</title>
+    <title>MLB THE SHOW 26 COOP - PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; transition: background-color 0.3s; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; overflow-x: hidden; }
         .card { background-color: #1e293b; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); transition: all 0.2s; }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); }
         .scoreboard-font { font-family: 'Courier New', Courier, monospace; }
         
         #hr-overlay {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
             z-index: 100; align-items: center; justify-content: center; flex-direction: column;
-            animation: fadeIn 0.4s ease-out;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .hr-text { font-size: 5rem; font-weight: 900; color: #fbbf24; text-shadow: 0 0 20px #fbbf24; animation: hr-bounce 0.5s infinite alternate; }
-        @keyframes hr-bounce { from { transform: scale(1); } to { transform: scale(1.05); } }
+        .hr-text { font-size: 5rem; font-weight: 900; color: #fbbf24; text-shadow: 0 0 20px #fbbf24; animation: bounce 0.5s infinite alternate; }
+        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
 
-        .out-dot { width: 14px; height: 14px; border-radius: 9999px; transition: all 0.3s; border: 2px solid rgba(255,255,255,0.1); }
-        .character-sprite { width: 60px; height: 60px; object-fit: contain; }
-        
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        .log-container { height: 200px; overflow-y: auto; scrollbar-width: thin; }
+        .out-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.1); }
+        .character-sprite { width: 50px; height: 50px; object-fit: contain; }
+        .scroll-custom::-webkit-scrollbar { width: 6px; }
+        .scroll-custom::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
-<body class="p-4 md:p-6">
+<body class="p-2 md:p-6">
 
     <div id="hr-overlay">
         <div class="hr-text italic">HOME RUN!</div>
-        <div class="mt-4 text-white text-2xl font-bold uppercase tracking-widest">¡HASTA LA LUNA! ⚾✨</div>
+        <img src="https://media.giphy.com/media/l0HlOn6UvV8xL5a6k/giphy.gif" class="mt-6 rounded-lg w-64 border-4 border-yellow-500">
     </div>
 
     <div class="max-w-6xl mx-auto">
-        <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <div>
-                <h1 class="text-3xl font-extrabold text-white tracking-tight">MLB THE SHOW <span class="text-blue-500">26 COOP</span></h1>
-                <p class="text-slate-400 font-medium italic">Advanced Analytics Dashboard</p>
-            </div>
+        <header class="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
+            <h1 class="text-2xl font-black italic">MLB THE SHOW <span class="text-blue-500">26 COOP</span></h1>
             <div class="flex gap-2 bg-slate-800 p-1 rounded-xl">
-                <button onclick="viewSection('game')" class="nav-btn px-4 py-2 rounded-lg font-semibold transition-all bg-blue-600 text-white" id="nav-game">🎮 Juego</button>
-                <button onclick="viewSection('stats')" class="nav-btn px-4 py-2 rounded-lg font-semibold transition-all text-slate-400" id="nav-stats">📊 Histórico</button>
-                <button onclick="viewSection('setup')" class="nav-btn px-4 py-2 rounded-lg font-semibold transition-all text-slate-400" id="nav-setup">⚙️ Equipo</button>
+                <button onclick="viewSection('game')" id="nav-game" class="px-4 py-2 rounded-lg font-bold transition-all bg-blue-600">Juego</button>
+                <button onclick="viewSection('stats')" id="nav-stats" class="px-4 py-2 rounded-lg font-bold transition-all text-slate-400">Estadísticas</button>
+                <button onclick="viewSection('setup')" id="nav-setup" class="px-4 py-2 rounded-lg font-bold transition-all text-slate-400">Equipo</button>
             </div>
         </header>
 
-        <div id="live-scoreboard" class="card p-5 mb-6 border-b-4 border-blue-600 flex flex-wrap justify-between items-center bg-slate-900 gap-6">
-            <div class="flex flex-col gap-3">
-                <div id="game-status-indicator" class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/50 w-fit">ESPERANDO PARTIDO</div>
-                <div class="flex gap-6">
-                    <div>
-                        <p class="text-[10px] text-blue-400 font-black uppercase mb-1">Outs Bateo</p>
-                        <div id="bat-outs" class="flex gap-2">
-                            <div class="out-dot bg-slate-700"></div><div class="out-dot bg-slate-700"></div><div class="out-dot bg-slate-700"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="text-[10px] text-red-500 font-black uppercase mb-1">Inning</p>
-                        <div id="inning-display" class="scoreboard-font text-2xl text-white font-bold">1ra</div>
-                    </div>
+        <div class="card p-4 mb-6 border-b-4 border-blue-600 bg-slate-900">
+            <div class="flex justify-around items-center text-center">
+                <div>
+                    <p class="text-[10px] text-blue-400 font-black">ANOTADAS</p>
+                    <span id="score-runs" class="scoreboard-font text-5xl font-bold">0</span>
+                </div>
+                <div class="bg-slate-800 px-6 py-2 rounded-xl border border-slate-700">
+                    <p class="text-[10px] text-slate-400 font-black">INNING</p>
+                    <span id="current-inning" class="text-3xl font-black text-yellow-500">1</span>
+                </div>
+                <div>
+                    <p class="text-[10px] text-red-500 font-black">PERMITIDAS</p>
+                    <span id="score-allowed" class="scoreboard-font text-5xl font-bold">0</span>
                 </div>
             </div>
-            
-            <div class="flex gap-8 items-center bg-slate-800/50 px-8 py-4 rounded-2xl border border-slate-700">
-                <div class="text-center">
-                    <p class="text-[10px] text-blue-400 font-black uppercase mb-1">Anotadas</p>
-                    <span id="score-runs" class="scoreboard-font text-5xl text-white">0</span>
+            <div class="flex justify-center gap-10 mt-4 border-t border-slate-800 pt-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold">BATEO:</span>
+                    <div id="bat-outs" class="flex gap-1"><div class="out-dot"></div><div class="out-dot"></div><div class="out-dot"></div></div>
                 </div>
-                <div class="text-slate-600 text-3xl font-black">VS</div>
-                <div class="text-center">
-                    <p class="text-[10px] text-red-500 font-black uppercase mb-1">Permitidas</p>
-                    <span id="score-allowed" class="scoreboard-font text-5xl text-white">0</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-red-400">PITCHEO:</span>
+                    <div id="pitch-outs" class="flex gap-1"><div class="out-dot"></div><div class="out-dot"></div><div class="out-dot"></div></div>
                 </div>
             </div>
         </div>
 
-        <section id="section-game" class="space-y-6">
-            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-4">
-                <button id="btn-toggle-game" onclick="toggleGame()" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-full font-black text-lg shadow-lg flex items-center gap-3">
-                    <span id="game-btn-icon">🏏</span> <span id="game-btn-text">EMPEZAR PARTIDO</span>
-                </button>
+        <section id="section-game">
+            <div class="flex justify-center mb-6">
+                <button id="btn-toggle" onclick="toggleGame()" class="px-10 py-3 rounded-full font-black bg-green-600 shadow-lg active:scale-95 transition-all">EMPEZAR PARTIDO</button>
             </div>
 
-            <div id="game-controls" class="opacity-30 pointer-events-none transition-all grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="card p-6 border-t-4 border-blue-500">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">🏏 Al Bate</h2>
-                        <div id="batter-sprite-container" class="h-16"></div>
+            <div id="game-controls" class="opacity-30 pointer-events-none grid grid-cols-1 md:grid-cols-2 gap-6 transition-all">
+                <div class="card p-5 border-t-4 border-blue-500">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="font-black italic">LINEUP</h2>
+                        <div id="batter-sprite-container"></div>
                     </div>
-                    <select id="activeBatter" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl"></select>
+                    <select id="activeBatter" onchange="manualUserChange()" class="w-full p-3 mb-4 rounded-lg bg-slate-900 border border-slate-700 font-bold"></select>
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="recordBatting('H', '#16a34a')" class="p-3 bg-green-600/20 border border-green-600/50 rounded-lg font-bold">1B</button>
-                        <button onclick="recordBatting('2B', '#059669')" class="p-3 bg-emerald-600/20 border border-emerald-600/50 rounded-lg font-bold">2B</button>
-                        <button onclick="recordBatting('3B', '#ea580c')" class="p-3 bg-orange-600/20 border border-orange-600/50 rounded-lg font-bold">3B</button>
-                        <button onclick="recordBatting('HR', '#eab308')" class="p-3 bg-yellow-600/20 border border-yellow-600/50 rounded-lg font-bold">HR</button>
-                        <button onclick="recordBatting('BB', '#2563eb')" class="p-3 bg-blue-600/20 border border-blue-600/50 rounded-lg font-bold">BB</button>
-                        <button onclick="recordBatting('RBI', '#9333ea')" class="p-3 bg-purple-600/20 border border-purple-600/50 rounded-lg font-bold">RBI</button>
-                        <button onclick="recordBatting('OUT', '#475569')" class="p-3 bg-slate-700 rounded-lg font-bold">OUT</button>
-                        <button onclick="recordBatting('K', '#dc2626')" class="p-3 bg-red-600/20 border border-red-600/50 rounded-lg font-bold">K</button>
-                        <button onclick="recordBatting('ERR', '#64748b')" class="p-3 bg-slate-600/20 border border-slate-600/50 rounded-lg font-bold">ERR</button>
+                        <button onclick="record('bat', 'H', '#22c55e')" class="bg-green-900/30 p-3 rounded font-bold text-green-400 border border-green-500/30">1B</button>
+                        <button onclick="record('bat', '2B', '#10b981')" class="bg-emerald-900/30 p-3 rounded font-bold text-emerald-400 border border-emerald-500/30">2B</button>
+                        <button onclick="record('bat', '3B', '#f97316')" class="bg-orange-900/30 p-3 rounded font-bold text-orange-400 border border-orange-500/30">3B</button>
+                        <button onclick="record('bat', 'HR', '#fbbf24')" class="bg-yellow-900/30 p-3 rounded font-bold text-yellow-400 border border-yellow-500/30">HR</button>
+                        <button onclick="record('bat', 'BB', '#3b82f6')" class="bg-blue-900/30 p-3 rounded font-bold text-blue-400 border border-blue-500/30">BB</button>
+                        <button onclick="record('bat', 'RBI', '#a855f7')" class="bg-purple-900/30 p-3 rounded font-bold text-purple-400 border border-purple-500/30">RBI</button>
+                        <button onclick="record('bat', 'OUT', '#64748b')" class="bg-slate-700 p-3 rounded font-bold">OUT</button>
+                        <button onclick="record('bat', 'K', '#ef4444')" class="bg-red-900/30 p-3 rounded font-bold text-red-400 border border-red-500/30">K</button>
+                        <button onclick="record('bat', 'E', '#94a3b8')" class="bg-slate-600/30 p-3 rounded font-bold text-slate-300">ERR</button>
                     </div>
                 </div>
 
-                <div class="card p-6 border-t-4 border-red-500">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">⚾ En la Loma</h2>
-                        <div id="pitcher-sprite-container" class="h-16"></div>
+                <div class="card p-5 border-t-4 border-red-500">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="font-black italic">BULLPEN</h2>
+                        <div id="pitcher-sprite-container"></div>
                     </div>
-                    <select id="activePitcher" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl"></select>
+                    <select id="activePitcher" onchange="manualUserChange()" class="w-full p-3 mb-4 rounded-lg bg-slate-900 border border-slate-700 font-bold"></select>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="recordPitching('K', '#dc2626')" class="p-3 bg-red-600/20 border border-red-600/50 rounded-lg font-bold">K PROPINADO</button>
-                        <button onclick="recordPitching('OUT', '#475569')" class="p-3 bg-slate-700 rounded-lg font-bold">OUT (Lanza)</button>
-                        <button onclick="recordPitching('ER', '#ef4444')" class="p-3 bg-red-900/40 border border-red-900/50 rounded-lg font-bold">C. LIMPIA (ER)</button>
-                        <button onclick="recordPitching('UER', '#fbbf24')" class="p-3 bg-yellow-900/40 border border-yellow-900/50 rounded-lg font-bold">C. SUCIA (UER)</button>
-                        <button onclick="recordPitching('HIT', '#ea580c')" class="p-3 bg-orange-600/20 border border-orange-600/50 rounded-lg font-bold">HIT RECIBIDO</button>
-                        <button onclick="recordPitching('BB', '#2563eb')" class="p-3 bg-blue-600/20 border border-blue-600/50 rounded-lg font-bold">BB LANZADA</button>
+                        <button onclick="record('pitch', 'K', '#ef4444')" class="bg-red-900/30 p-3 rounded font-bold text-red-400 border border-red-500/30">PONCHE (K)</button>
+                        <button onclick="record('pitch', 'OUT', '#64748b')" class="bg-slate-700 p-3 rounded font-bold">OUT</button>
+                        <button onclick="record('pitch', 'H', '#f97316')" class="bg-orange-900/30 p-3 rounded font-bold text-orange-400 border border-orange-500/30">HIT RECIBIDO</button>
+                        <button onclick="record('pitch', 'BB', '#3b82f6')" class="bg-blue-900/30 p-3 rounded font-bold text-blue-400 border border-blue-500/30">WALK (BB)</button>
+                        <button onclick="record('pitch', 'ER', '#dc2626')" class="bg-red-600 p-3 rounded font-bold col-span-1">C. LIMPIA</button>
+                        <button onclick="record('pitch', 'UER', '#94a3b8')" class="bg-slate-500 p-3 rounded font-bold col-span-1">C. SUCIA</button>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="card p-5 bg-slate-900/80">
-                    <h3 class="text-xs font-black text-blue-500 uppercase mb-4">Registro Bateo (Click ✕ para borrar)</h3>
-                    <div id="battingEvents" class="log-container space-y-2"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div class="card p-4 bg-slate-900/50">
+                    <h3 class="text-xs font-black text-blue-500 mb-3 uppercase">Historial Bateo</h3>
+                    <div id="battingLogs" class="space-y-1 max-h-[400px] overflow-y-auto scroll-custom p-1"></div>
                 </div>
-                <div class="card p-5 bg-slate-900/80">
-                    <h3 class="text-xs font-black text-red-500 uppercase mb-4">Registro Pitcheo (Click ✕ para borrar)</h3>
-                    <div id="pitchingEvents" class="log-container space-y-2"></div>
+                <div class="card p-4 bg-slate-900/50">
+                    <h3 class="text-xs font-black text-red-500 mb-3 uppercase">Historial Pitcheo</h3>
+                    <div id="pitchingLogs" class="space-y-1 max-h-[400px] overflow-y-auto scroll-custom p-1"></div>
                 </div>
             </div>
         </section>
 
-        <section id="section-stats" class="hidden space-y-6">
-            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-blue-600 pb-2">Estadísticas Acumuladas</h2>
-            <div id="statsContainer" class="grid grid-cols-1 gap-6"></div>
+        <section id="section-stats" class="hidden">
+            <div id="statsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
         </section>
 
         <section id="section-setup" class="hidden">
             <div class="card p-6 max-w-md mx-auto">
-                <h2 class="text-xl font-bold mb-4 text-center">Gestionar Equipo</h2>
                 <div class="flex gap-2 mb-6">
                     <input type="text" id="playerNameInput" placeholder="Nombre..." class="flex-1 p-3 rounded-lg bg-slate-800 border border-slate-700">
-                    <button onclick="addPlayer()" class="btn-primary px-5 py-2 rounded-lg font-black">AÑADIR</button>
+                    <button onclick="addPlayer()" class="bg-blue-600 px-5 py-2 rounded-lg font-black">AÑADIR</button>
                 </div>
                 <div id="playerList" class="space-y-2"></div>
-                <button onclick="clearHistory()" class="mt-8 text-red-500 text-xs font-black block mx-auto underline uppercase">Borrar Todo</button>
+                <button onclick="clearAll()" class="mt-10 text-red-500 text-xs font-bold block mx-auto underline uppercase">Resetear Todo</button>
             </div>
         </section>
     </div>
 
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-24 opacity-0 transition-all bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black z-50 border-4 border-blue-600"></div>
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all bg-white text-slate-900 px-6 py-3 rounded-xl font-bold shadow-2xl z-50"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
@@ -167,259 +150,270 @@
             projectId: "mlb-coop",
             databaseURL: "https://mlb-coop-default-rtdb.firebaseio.com"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let players = [];
-        let isGameActive = false;
-        let currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
-        let historyLogs = { batting: [], pitching: [] };
-        let activeSelection = { batterId: "", pitcherId: "" };
+        let state = {
+            players: [],
+            isGameActive: false,
+            inning: 1,
+            scoreRuns: 0,
+            scoreAllowed: 0,
+            batOuts: 0,
+            pitchOuts: 0,
+            logs: [],
+            activeBatter: "",
+            activePitcher: "",
+            hrTrigger: 0
+        };
 
         const SPRITES = {
             heman: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9iZCZjdD1z/3o7TKpXXqZ7XmN4gPS/giphy.gif",
             skeletor: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9iZCZjdD1z/3o7TKpN3vV8hR8v98Y/giphy.gif"
         };
 
-        function save() {
-            db.ref('gameData').set({ players, score: currentGameScore, isGameActive, logs: historyLogs, activeSelection });
-        }
-
-        db.ref('gameData').on('value', (snapshot) => {
-            const data = snapshot.val();
+        db.ref('mlb_state').on('value', (snap) => {
+            const data = snap.val();
             if (data) {
-                players = data.players || [];
-                currentGameScore = data.score || { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
-                isGameActive = data.isGameActive || false;
-                historyLogs = data.logs || { batting: [], pitching: [] };
-                activeSelection = data.activeSelection || { batterId: "", pitcherId: "" };
+                const oldHR = state.hrTrigger;
+                state = data;
+                // Si el contador de HR subió, mostramos la animación a todos
+                if (state.hrTrigger > oldHR) showHRAnim();
                 updateUI();
             }
         });
 
+        function save() { db.ref('mlb_state').set(state); }
+
         function updateUI() {
-            document.getElementById('score-runs').innerText = currentGameScore.runs;
-            document.getElementById('score-allowed').innerText = currentGameScore.allowed;
-            document.getElementById('inning-display').innerText = `${currentGameScore.inning}ra`;
+            document.getElementById('score-runs').innerText = state.scoreRuns;
+            document.getElementById('score-allowed').innerText = state.scoreAllowed;
+            document.getElementById('current-inning').innerText = state.inning;
             
             const bDots = document.getElementById('bat-outs').children;
-            for(let i=0; i<3; i++) bDots[i].style.backgroundColor = i < currentGameScore.batOuts ? '#3b82f6' : '#334155';
+            const pDots = document.getElementById('pitch-outs').children;
+            for(let i=0; i<3; i++) {
+                bDots[i].style.backgroundColor = i < state.batOuts ? '#3b82f6' : '#334155';
+                pDots[i].style.backgroundColor = i < state.pitchOuts ? '#ef4444' : '#334155';
+            }
 
-            updateStatusUI();
+            const ctrl = document.getElementById('game-controls');
+            const btn = document.getElementById('btn-toggle');
+            if(state.isGameActive) {
+                ctrl.classList.remove('opacity-30', 'pointer-events-none');
+                btn.innerText = "FINALIZAR PARTIDO";
+                btn.className = "px-10 py-3 rounded-full font-black bg-red-600 shadow-lg";
+            } else {
+                ctrl.classList.add('opacity-30', 'pointer-events-none');
+                btn.innerText = "EMPEZAR PARTIDO";
+                btn.className = "px-10 py-3 rounded-full font-black bg-green-600 shadow-lg";
+            }
+
+            renderDropdowns();
             renderLogs();
             renderStats();
-            renderPlayerList();
-            updateDropdowns();
-            updateCharacters();
+            renderPlayerSetup();
+            updateSprites();
         }
 
-        function formatAvg(val) {
-            if (val === 0) return "000";
-            return val.toFixed(3).toString().split('.')[1] || "000";
-        }
+        function record(mode, type, color) {
+            const pid = mode === 'bat' ? state.activeBatter : state.activePitcher;
+            if(!pid) return showToast("Selecciona jugador");
+            const player = state.players.find(p => p.id == pid);
 
-        function calculateERA(er, outs) {
-            if (outs === 0) return "0.00";
-            return ((er * 27) / outs).toFixed(2);
-        }
+            const event = {
+                id: Date.now(),
+                mode,
+                type,
+                playerName: player.name,
+                playerId: pid,
+                color,
+                inning: state.inning
+            };
 
-        function recordBatting(type, color) {
-            const pid = activeSelection.batterId;
-            if(!pid) return showToast("⚠️ Selecciona un bateador");
-            const p = players.find(x => x.id == pid);
-            
-            const entry = { id: Date.now(), pid, name: p.name, type, color };
+            if(!state.logs) state.logs = [];
+            state.logs.unshift(event);
 
-            if (['H','2B','3B','HR','OUT','K'].includes(type)) p.stats.atBats++;
-            if (['H','2B','3B','HR'].includes(type)) p.stats.hits++;
-            if (type === '2B') p.stats.d2b = (p.stats.d2b || 0) + 1;
-            if (type === '3B') p.stats.t3b = (p.stats.t3b || 0) + 1;
-            if (type === 'BB') p.stats.bb_rec = (p.stats.bb_rec || 0) + 1;
-            if (type === 'HR') { p.stats.hr++; p.stats.rbi++; currentGameScore.runs++; showHR(); }
-            if (type === 'RBI') { p.stats.rbi++; currentGameScore.runs++; }
-            if (type === 'K') p.stats.k_rec = (p.stats.k_rec || 0) + 1;
-            if (type === 'OUT' || type === 'K') currentGameScore.batOuts++;
-
-            historyLogs.batting.unshift(entry);
-            if (type !== 'RBI') rotatePlayer('batter');
-            if (currentGameScore.batOuts >= 3) { currentGameScore.batOuts = 0; currentGameScore.inning++; }
-            save();
-        }
-
-        function recordPitching(type, color) {
-            const pid = activeSelection.pitcherId;
-            if(!pid) return showToast("⚠️ Selecciona un pitcher");
-            const p = players.find(x => x.id == pid);
-            const entry = { id: Date.now(), pid, name: p.name, type, color };
-
-            if (type === 'K') { p.stats.pk++; p.stats.p_outs = (p.stats.p_outs || 0) + 1; currentGameScore.pitchOuts++; }
-            if (type === 'OUT') { p.stats.p_outs = (p.stats.p_outs || 0) + 1; currentGameScore.pitchOuts++; }
-            if (type === 'ER') { p.stats.pruns++; currentGameScore.allowed++; }
-            if (type === 'UER') { currentGameScore.allowed++; } // Carrera sucia no suma a p.stats.pruns
-            if (type === 'BB') p.stats.bb_lan = (p.stats.bb_lan || 0) + 1;
-            if (type === 'HIT') p.stats.h_lan = (p.stats.h_lan || 0) + 1;
-
-            historyLogs.pitching.unshift(entry);
-            if (currentGameScore.pitchOuts >= 3) {
-                showToast("✅ CAMBIO DE INNING / ROTA PITCHER");
-                currentGameScore.pitchOuts = 0;
-                rotatePlayer('pitcher');
+            if(mode === 'bat') {
+                if(type === 'HR') { state.scoreRuns++; state.hrTrigger++; }
+                if(type === 'RBI') { state.scoreRuns++; }
+                if(type === 'OUT' || type === 'K') state.batOuts++;
+                if(state.batOuts >= 3) { state.batOuts = 0; showToast("¡CAMBIO DE INNING!"); }
+                if(type !== 'RBI') rotate('activeBatter');
+            } else {
+                if(type === 'K' || type === 'OUT') state.pitchOuts++;
+                if(type === 'ER' || type === 'UER') state.scoreAllowed++;
+                if(state.pitchOuts >= 3) { 
+                    state.pitchOuts = 0; 
+                    state.inning++; 
+                    showToast("¡INNING COMPLETADO!"); 
+                    rotate('activePitcher');
+                }
             }
             save();
         }
 
-        function deleteLog(side, logId) {
-            const logs = historyLogs[side];
-            const idx = logs.findIndex(l => l.id === logId);
-            if (idx > -1) {
-                const log = logs[idx];
-                const p = players.find(x => x.id == log.pid);
-                // Revertir stats (Básico)
-                if (side === 'batting') {
-                    if (['H','2B','3B','HR','OUT','K'].includes(log.type)) p.stats.atBats--;
-                    if (['H','2B','3B','HR'].includes(log.type)) p.stats.hits--;
-                    if (log.type === 'HR') { p.stats.hr--; p.stats.rbi--; currentGameScore.runs--; }
-                    if (log.type === 'RBI') { p.stats.rbi--; currentGameScore.runs--; }
-                    if (log.type === 'OUT' || log.type === 'K') currentGameScore.batOuts = Math.max(0, currentGameScore.batOuts - 1);
-                } else {
-                    if (log.type === 'K' || log.type === 'OUT') { p.stats.p_outs--; currentGameScore.pitchOuts = Math.max(0, currentGameScore.pitchOuts - 1); }
-                    if (log.type === 'ER') { p.stats.pruns--; currentGameScore.allowed--; }
-                    if (log.type === 'UER') currentGameScore.allowed--;
+        function deleteLog(logId) {
+            const index = state.logs.findIndex(l => l.id === logId);
+            if(index > -1) {
+                const log = state.logs[index];
+                if(log.type === 'HR' || log.type === 'RBI') state.scoreRuns--;
+                if(log.type === 'ER' || log.type === 'UER') state.scoreAllowed--;
+                if(log.type === 'OUT' || log.type === 'K') {
+                    if(log.mode === 'bat') state.batOuts = Math.max(0, state.batOuts - 1);
+                    else state.pitchOuts = Math.max(0, state.pitchOuts - 1);
                 }
-                logs.splice(idx, 1);
+                state.logs.splice(index, 1);
                 save();
             }
         }
 
-        function renderLogs() {
-            const render = (side) => (historyLogs[side] || []).map(l => `
-                <div class="flex justify-between items-center p-2 bg-slate-800 rounded border-l-4 mb-1" style="border-color: ${l.color}">
-                    <div><span class="font-bold text-sm">${l.name}</span> <span class="ml-2 font-black" style="color: ${l.color}">${l.type}</span></div>
-                    <button onclick="deleteLog('${side}', ${l.id})" class="text-slate-500 hover:text-red-500 px-2 font-bold">✕</button>
-                </div>
-            `).join('');
+        function rotate(key) {
+            if (state.players.length === 0) return;
+            const currentIndex = state.players.findIndex(p => p.id == state[key]);
+            const nextIndex = (currentIndex + 1) % state.players.length;
+            state[key] = state.players[nextIndex].id;
+        }
 
-            document.getElementById('battingEvents').innerHTML = render('batting');
-            document.getElementById('pitchingEvents').innerHTML = render('pitching');
+        function renderLogs() {
+            const batContainer = document.getElementById('battingLogs');
+            const pitchContainer = document.getElementById('pitchingLogs');
+            
+            const createLogHtml = (l) => `
+                <div class="flex justify-between items-center p-2 bg-slate-800 rounded border-l-4 mb-1" style="border-color:${l.color}">
+                    <span class="text-xs"><b>Inning ${l.inning}</b> | ${l.playerName}</span>
+                    <div class="flex items-center gap-3">
+                        <span class="font-black" style="color:${l.color}">${l.type}</span>
+                        <button onclick="deleteLog(${l.id})" class="text-xs text-slate-500 hover:text-red-500">❌</button>
+                    </div>
+                </div>`;
+
+            batContainer.innerHTML = (state.logs || []).filter(l => l.mode === 'bat').map(createLogHtml).join('');
+            pitchContainer.innerHTML = (state.logs || []).filter(l => l.mode === 'pitch').map(createLogHtml).join('');
         }
 
         function renderStats() {
-            document.getElementById('statsContainer').innerHTML = players.map(p => {
-                const avg = p.stats.atBats > 0 ? formatAvg(p.stats.hits / p.stats.atBats) : "000";
-                const era = calculateERA(p.stats.pruns || 0, p.stats.p_outs || 0);
-                const isBeto = p.name.toLowerCase().includes('beto');
-                
+            const container = document.getElementById('statsContainer');
+            container.innerHTML = state.players.map(p => {
+                const logs = (state.logs || []);
+                const myBatLogs = logs.filter(l => l.playerId == p.id && l.mode === 'bat');
+                const myPitchLogs = logs.filter(l => l.playerId == p.id && l.mode === 'pitch');
+
+                // Bateo
+                const ab = myBatLogs.filter(l => ['H','2B','3B','HR','OUT','K'].includes(l.type)).length;
+                const h1b = myBatLogs.filter(l => l.type === 'H').length;
+                const h2b = myBatLogs.filter(l => l.type === '2B').length;
+                const h3b = myBatLogs.filter(l => l.type === '3B').length;
+                const hr = myBatLogs.filter(l => l.type === 'HR').length;
+                const hits = h1b + h2b + h3b + hr;
+                const bbRec = myBatLogs.filter(l => l.type === 'BB').length;
+                const kRec = myBatLogs.filter(l => l.type === 'K').length;
+                const rbi = myBatLogs.filter(l => l.type === 'RBI' || l.type === 'HR').length;
+                const avg = ab > 0 ? (hits / ab).toFixed(3).replace('0.', '.') : ".000";
+
+                // Pitcheo
+                const outs = myPitchLogs.filter(l => ['K','OUT'].includes(l.type)).length;
+                const er = myPitchLogs.filter(l => l.type === 'ER').length;
+                const kProp = myPitchLogs.filter(l => l.type === 'K').length;
+                const bbGave = myPitchLogs.filter(l => l.type === 'BB').length;
+                const ip = (Math.floor(outs / 3) + (outs % 3) / 10).toFixed(1);
+                const era = outs > 0 ? ((er * 9) / (outs / 3)).toFixed(2) : "0.00";
+
                 return `
-                <div class="card p-5 border-l-8 ${isBeto ? 'border-blue-500' : 'border-red-500'}">
-                    <div class="flex flex-wrap justify-between items-end mb-4 border-b border-slate-700 pb-2">
-                        <div>
-                            <h3 class="text-2xl font-black uppercase">${p.name}</h3>
-                            <p class="text-blue-400 text-xs font-bold">AVG: .${avg} | ERA: ${era}</p>
+                <div class="card p-5 border-l-4 ${p.name.toLowerCase().includes('beto') ? 'border-blue-500' : 'border-red-500'}">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-black uppercase text-lg">${p.name}</h3>
+                        <div class="flex gap-2 text-[10px] font-bold">
+                            <span class="bg-blue-600 px-2 py-1 rounded">AVG: ${avg}</span>
+                            <span class="bg-red-600 px-2 py-1 rounded">ERA: ${era}</span>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
-                        <div class="bg-slate-800 p-2 rounded">
-                            <p class="text-[10px] text-slate-400">BATEO</p>
-                            <p class="text-sm font-bold">VB: ${p.stats.atBats} | H: ${p.stats.hits} | HR: ${p.stats.hr}</p>
-                            <p class="text-[10px] text-slate-500">2B: ${p.stats.d2b || 0} | 3B: ${p.stats.t3b || 0} | BB: ${p.stats.bb_rec || 0} | K: ${p.stats.k_rec || 0}</p>
+                    <div class="space-y-4">
+                        <div>
+                            <p class="text-[9px] text-blue-400 font-bold border-b border-slate-700 mb-2">BATEO</p>
+                            <div class="grid grid-cols-4 gap-2 text-center">
+                                <div><p class="text-[9px] text-slate-400">AB</p><p class="text-sm font-bold">${ab}</p></div>
+                                <div><p class="text-[9px] text-slate-400">H</p><p class="text-sm font-bold">${hits}</p></div>
+                                <div><p class="text-[9px] text-slate-400">2B</p><p class="text-sm font-bold">${h2b}</p></div>
+                                <div><p class="text-[9px] text-slate-400">3B</p><p class="text-sm font-bold">${h3b}</p></div>
+                                <div><p class="text-[9px] text-slate-400">HR</p><p class="text-sm font-bold text-yellow-500">${hr}</p></div>
+                                <div><p class="text-[9px] text-slate-400">RBI</p><p class="text-sm font-bold">${rbi}</p></div>
+                                <div><p class="text-[9px] text-slate-400">BB-R</p><p class="text-sm font-bold text-blue-300">${bbRec}</p></div>
+                                <div><p class="text-[9px] text-slate-400">K-R</p><p class="text-sm font-bold text-red-400">${kRec}</p></div>
+                            </div>
                         </div>
-                        <div class="bg-slate-800 p-2 rounded">
-                            <p class="text-[10px] text-red-400">PITCHEO</p>
-                            <p class="text-sm font-bold">K: ${p.stats.pk} | ER: ${p.stats.pruns || 0}</p>
-                            <p class="text-[10px] text-slate-500">H-L: ${p.stats.h_lan || 0} | BB-L: ${p.stats.bb_lan || 0} | OUTS: ${p.stats.p_outs || 0}</p>
+                        <div>
+                            <p class="text-[9px] text-red-400 font-bold border-b border-slate-700 mb-2">PITCHEO</p>
+                            <div class="grid grid-cols-4 gap-2 text-center">
+                                <div><p class="text-[9px] text-slate-400">IP</p><p class="text-sm font-bold">${ip}</p></div>
+                                <div><p class="text-[9px] text-slate-400">ER</p><p class="text-sm font-bold">${er}</p></div>
+                                <div><p class="text-[9px] text-slate-400">K-P</p><p class="text-sm font-bold text-green-400">${kProp}</p></div>
+                                <div><p class="text-[9px] text-slate-400">BB-D</p><p class="text-sm font-bold text-orange-400">${bbGave}</p></div>
+                            </div>
                         </div>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        // --- FUNCIONES AUXILIARES MANTENIDAS ---
-        function rotatePlayer(type) {
-            if (players.length < 2) return;
-            const currentId = activeSelection[type === 'batter' ? 'batterId' : 'pitcherId'];
-            let idx = players.findIndex(p => p.id == currentId);
-            let nextIdx = (idx + 1) % players.length;
-            activeSelection[type === 'batter' ? 'batterId' : 'pitcherId'] = players[nextIdx].id;
-        }
-
-        function manualUserChange() {
-            activeSelection.batterId = document.getElementById('activeBatter').value;
-            activeSelection.pitcherId = document.getElementById('activePitcher').value;
-            save();
-        }
-
-        function updateDropdowns() {
-            const options = '<option value="">ELIJE JUGADOR</option>' + players.map(p => `<option value="${p.id}">${p.name.toUpperCase()}</option>`).join('');
-            document.getElementById('activeBatter').innerHTML = options;
-            document.getElementById('activePitcher').innerHTML = options;
-            if(activeSelection.batterId) document.getElementById('activeBatter').value = activeSelection.batterId;
-            if(activeSelection.pitcherId) document.getElementById('activePitcher').value = activeSelection.pitcherId;
-        }
-
-        function updateCharacters() {
-            const bName = (players.find(p => p.id == activeSelection.batterId)?.name || "").toLowerCase();
-            const pName = (players.find(p => p.id == activeSelection.pitcherId)?.name || "").toLowerCase();
-            document.getElementById('batter-sprite-container').innerHTML = bName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : (bName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : "");
-            document.getElementById('pitcher-sprite-container').innerHTML = pName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : (pName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : "");
-        }
-
         function toggleGame() {
-            if (!isGameActive) {
-                if (players.length === 0) return showToast("⚠️ ¡Añade jugadores!");
-                isGameActive = true;
-                currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
-                activeSelection = { batterId: players[0].id, pitcherId: players[0].id };
+            if(!state.isGameActive) {
+                if(state.players.length === 0) return showToast("Añade jugadores primero");
+                state.isGameActive = true;
+                state.inning = 1;
+                state.scoreRuns = 0; state.scoreAllowed = 0;
+                state.batOuts = 0; state.pitchOuts = 0;
+                state.logs = [];
+                state.activeBatter = state.players[0].id;
+                state.activePitcher = state.players[0].id;
             } else {
-                if (!confirm("¿Finalizar partido?")) return;
-                isGameActive = false;
+                if(!confirm("¿Finalizar partido?")) return;
+                state.isGameActive = false;
             }
             save();
-        }
-
-        function updateStatusUI() {
-            const controls = document.getElementById('game-controls');
-            const indicator = document.getElementById('game-status-indicator');
-            if (isGameActive) {
-                controls.classList.remove('opacity-30', 'pointer-events-none');
-                indicator.innerText = "• PARTIDO EN VIVO •";
-                indicator.className = "px-4 py-1 rounded-full text-xs font-black bg-green-500/20 text-green-400 border border-green-500/50 w-fit";
-            } else {
-                controls.classList.add('opacity-30', 'pointer-events-none');
-                indicator.innerText = "ESPERANDO PARTIDO";
-                indicator.className = "px-4 py-1 rounded-full text-xs font-black bg-red-500/20 text-red-400 border border-red-500/50 w-fit";
-            }
         }
 
         function addPlayer() {
             const input = document.getElementById('playerNameInput');
-            if (input.value.trim()) {
-                players.push({ id: Date.now(), name: input.value.trim(), stats: { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0, d2b:0, t3b:0, bb_rec:0, k_rec:0, p_outs:0, h_lan:0, bb_lan:0 } });
-                input.value = ''; save();
+            if(input.value) {
+                state.players.push({ id: Date.now(), name: input.value });
+                input.value = "";
+                save();
             }
         }
 
-        function renderPlayerList() {
-            document.getElementById('playerList').innerHTML = players.map(p => `
-                <div class="flex justify-between p-3 bg-slate-800 rounded-xl mb-2 border border-slate-700">
-                    <span>👤 ${p.name}</span>
-                    <button onclick="removePlayer(${p.id})" class="text-red-400">✕</button>
-                </div>
-            `).join('');
+        function renderPlayerSetup() {
+            document.getElementById('playerList').innerHTML = state.players.map(p => `
+                <div class="flex justify-between p-2 bg-slate-800 rounded">
+                    <span>${p.name}</span>
+                    <button onclick="state.players = state.players.filter(x=>x.id != ${p.id}); save()" class="text-red-500">✕</button>
+                </div>`).join('');
         }
 
-        function removePlayer(id) { if(confirm("¿Eliminar?")) { players = players.filter(p => p.id !== id); save(); } }
-
-        function viewSection(id) {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById('section-' + id).classList.remove('hidden');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-blue-600', 'text-white'));
-            document.getElementById('nav-' + id).classList.add('bg-blue-600', 'text-white');
+        function renderDropdowns() {
+            const options = state.players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            const bSelect = document.getElementById('activeBatter');
+            const pSelect = document.getElementById('activePitcher');
+            bSelect.innerHTML = options;
+            pSelect.innerHTML = options;
+            bSelect.value = state.activeBatter;
+            pSelect.value = state.activePitcher;
         }
 
-        function clearHistory() { if(confirm("¿BORRAR TODO?")) { players = []; isGameActive = false; save(); } }
+        function manualUserChange() {
+            state.activeBatter = document.getElementById('activeBatter').value;
+            state.activePitcher = document.getElementById('activePitcher').value;
+            save();
+        }
 
-        function showHR() {
+        function updateSprites() {
+            const b = state.players.find(p => p.id == state.activeBatter)?.name.toLowerCase() || "";
+            const p = state.players.find(p => p.id == state.activePitcher)?.name.toLowerCase() || "";
+            document.getElementById('batter-sprite-container').innerHTML = b.includes('beto') ? `<img src="${SPRITES.heman}" class="character-sprite">` : (b.includes('nasa') ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : "");
+            document.getElementById('pitcher-sprite-container').innerHTML = p.includes('nasa') ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : (p.includes('beto') ? `<img src="${SPRITES.heman}" class="character-sprite">` : "");
+        }
+
+        function showHRAnim() {
             const ov = document.getElementById('hr-overlay');
             ov.style.display = 'flex';
             setTimeout(() => ov.style.display = 'none', 3000);
@@ -428,10 +422,17 @@
         function showToast(m) {
             const t = document.getElementById('toast');
             t.innerText = m; t.classList.remove('opacity-0', 'translate-y-24');
-            setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2500);
+            setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2000);
         }
 
-        window.onload = () => viewSection('game');
+        function viewSection(id) {
+            ['game', 'stats', 'setup'].forEach(s => document.getElementById('section-'+s).classList.add('hidden'));
+            document.getElementById('section-'+id).classList.remove('hidden');
+            ['game', 'stats', 'setup'].forEach(s => document.getElementById('nav-'+s).classList.remove('bg-blue-600'));
+            document.getElementById('nav-'+id).classList.add('bg-blue-600');
+        }
+
+        function clearAll() { if(confirm("¿Borrar todo?")) { state.logs = []; state.players = []; state.isGameActive = false; state.hrTrigger = 0; save(); } }
     </script>
 </body>
 </html>
