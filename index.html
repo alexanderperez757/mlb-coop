@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLB THE SHOW 26 COOP</title>
+    <title>MLB THE SHOW 26 COOP - PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -14,22 +14,32 @@
         .scoreboard-font { font-family: 'Courier New', Courier, monospace; }
         
         #hr-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
-            z-index: 100; align-items: center; justify-content: center;
-            flex-direction: column; animation: fadeIn 0.4s ease-out;
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            animation: fadeIn 0.4s ease-out;
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .hr-text {
-            font-size: 5rem; font-weight: 900; color: #fbbf24;
+            font-size: 5rem;
+            font-weight: 900;
+            color: #fbbf24;
             text-shadow: 0 0 20px #fbbf24, 0 0 40px #d97706;
             animation: hr-bounce 0.5s infinite alternate;
         }
         @keyframes hr-bounce { from { transform: scale(1); } to { transform: scale(1.05); } }
 
         .out-dot { width: 14px; height: 14px; border-radius: 9999px; transition: all 0.3s; border: 2px solid rgba(255,255,255,0.1); }
-        .character-sprite { width: 60px; height: 60px; object-fit: contain; }
+        .character-sprite { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+        
         ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
@@ -38,6 +48,7 @@
     <div id="hr-overlay">
         <div class="hr-text italic">HOME RUN!</div>
         <div class="mt-4 text-white text-2xl font-bold uppercase tracking-widest">¡HASTA LA LUNA! ⚾✨</div>
+        <img src="https://media.giphy.com/media/l0HlOn6UvV8xL5a6k/giphy.gif" class="mt-6 rounded-lg shadow-2xl border-4 border-yellow-500 w-64 md:w-80" alt="Home Run">
     </div>
 
     <div class="max-w-6xl mx-auto">
@@ -53,95 +64,110 @@
             </div>
         </header>
 
-        <div id="live-scoreboard" class="card p-5 mb-6 border-b-4 border-blue-600 bg-slate-900">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div class="flex flex-col gap-3">
-                    <div class="flex items-center gap-3">
-                        <div id="game-status-indicator" class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/50 w-fit">
-                            ESPERANDO PARTIDO
-                        </div>
-                        <div id="inning-display" class="bg-blue-600 px-3 py-1 rounded-md text-xs font-black text-white">INNING: 1</div>
-                    </div>
-                    <div class="flex gap-8">
-                        <div>
-                            <p class="text-[10px] text-blue-400 font-black uppercase mb-2">Outs Bateando</p>
-                            <div id="bat-outs" class="flex gap-2">
-                                <div class="out-dot bg-slate-700"></div><div class="out-dot bg-slate-700"></div><div class="out-dot bg-slate-700"></div>
-                            </div>
-                        </div>
-                        <div>
-                            <p class="text-[10px] text-red-500 font-black uppercase mb-2">Outs Pitcheando</p>
-                            <div id="pitch-outs" class="flex gap-2">
-                                <div class="out-dot bg-slate-700"></div><div class="out-dot bg-slate-700"></div><div class="out-dot bg-slate-700"></div>
-                            </div>
+        <div id="live-scoreboard" class="card p-5 mb-6 border-b-4 border-blue-600 flex flex-col md:flex-row justify-between items-center bg-slate-900 gap-6">
+            <div class="flex flex-col gap-3 w-full md:w-auto">
+                <div id="game-status-indicator" class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/50 w-fit">
+                    ESPERANDO PARTIDO
+                </div>
+                <div class="flex gap-8">
+                    <div>
+                        <p class="text-[10px] text-blue-400 font-black uppercase mb-2 tracking-tighter italic">Inning: <span id="display-inning" class="text-white text-sm">1</span></p>
+                        <div id="bat-outs" class="flex gap-2">
+                            <div class="out-dot bg-slate-700"></div>
+                            <div class="out-dot bg-slate-700"></div>
+                            <div class="out-dot bg-slate-700"></div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="flex gap-8 md:gap-12 items-center bg-slate-800/50 px-8 py-4 rounded-2xl border border-slate-700">
-                    <div class="text-center">
-                        <p class="text-[10px] text-blue-400 font-black uppercase mb-1">Anotadas</p>
-                        <span id="score-runs" class="scoreboard-font text-5xl text-white">0</span>
-                    </div>
-                    <div class="text-slate-600 text-3xl font-black">VS</div>
-                    <div class="text-center">
-                        <p class="text-[10px] text-red-500 font-black uppercase mb-1">Permitidas</p>
-                        <span id="score-allowed" class="scoreboard-font text-5xl text-white">0</span>
-                    </div>
+            </div>
+            
+            <div class="flex gap-8 md:gap-12 items-center bg-slate-800/50 px-8 py-4 rounded-2xl border border-slate-700">
+                <div class="text-center">
+                    <p class="text-[10px] text-blue-400 font-black uppercase mb-1">Anotadas</p>
+                    <span id="score-runs" class="scoreboard-font text-5xl text-white">0</span>
+                </div>
+                <div class="text-slate-600 text-3xl font-black">VS</div>
+                <div class="text-center">
+                    <p class="text-[10px] text-red-500 font-black uppercase mb-1">Permitidas</p>
+                    <span id="score-allowed" class="scoreboard-font text-5xl text-white">0</span>
                 </div>
             </div>
         </div>
 
         <section id="section-game" class="space-y-6">
             <div class="flex flex-col sm:flex-row justify-center gap-4 mb-4">
-                <button id="btn-toggle-game" onclick="toggleGame()" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-full font-black text-lg shadow-lg flex items-center gap-3">
+                <button id="btn-toggle-game" onclick="toggleGame()" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-full font-black text-lg shadow-lg transform transition-all active:scale-95 flex items-center gap-3">
                     <span id="game-btn-icon">🏏</span> <span id="game-btn-text">EMPEZAR PARTIDO</span>
                 </button>
             </div>
 
-            <div id="game-controls" class="opacity-30 pointer-events-none grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="game-controls" class="opacity-30 pointer-events-none transition-all duration-300 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="card p-6 border-t-4 border-blue-500">
                     <div class="flex justify-between items-center mb-4">
                         <h2 class="text-xl font-bold">🏏 Lineup</h2>
-                        <div id="batter-sprite-container" class="h-12"></div>
+                        <div id="batter-sprite-container" class="h-16 flex items-center"></div>
                     </div>
-                    <select id="activeBatter" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl"></select>
+                    <select id="activeBatter" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-blue-500"></select>
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="recordBatting('H', '#16a34a')" class="p-3 bg-green-600/20 border border-green-600/50 rounded-lg font-bold text-green-400">1B</button>
-                        <button onclick="recordBatting('2B', '#059669')" class="p-3 bg-emerald-600/20 border border-emerald-600/50 rounded-lg font-bold text-emerald-400">2B</button>
-                        <button onclick="recordBatting('3B', '#ea580c')" class="p-3 bg-orange-600/20 border border-orange-600/50 rounded-lg font-bold text-orange-400">3B</button>
-                        <button onclick="recordBatting('HR', '#eab308')" class="p-3 bg-yellow-600/20 border border-yellow-600/50 rounded-lg font-bold text-yellow-400">HR</button>
-                        <button onclick="recordBatting('BB', '#2563eb')" class="p-3 bg-blue-600/20 border border-blue-600/50 rounded-lg font-bold text-blue-400">BB</button>
-                        <button onclick="recordBatting('RBI', '#9333ea')" class="p-3 bg-purple-600/20 border border-purple-600/50 rounded-lg font-bold text-purple-400">RBI</button>
-                        <button onclick="recordBatting('OUT', '#475569')" class="p-3 bg-slate-700 rounded-lg font-bold">OUT</button>
-                        <button onclick="recordBatting('K', '#dc2626')" class="p-3 bg-red-600/20 border border-red-600/50 rounded-lg font-bold text-red-400">K</button>
-                        <button onclick="nextInning()" class="p-3 bg-slate-800 border border-slate-600 rounded-lg font-bold text-white">SIG. INNING</button>
+                        <button onclick="recordBatting('H', '#16a34a')" class="p-3 bg-green-600/20 hover:bg-green-600/40 border border-green-600/50 rounded-lg font-bold text-green-400">1B</button>
+                        <button onclick="recordBatting('2B', '#059669')" class="p-3 bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-600/50 rounded-lg font-bold text-emerald-400">2B</button>
+                        <button onclick="recordBatting('3B', '#ea580c')" class="p-3 bg-orange-600/20 hover:bg-orange-600/40 border border-orange-600/50 rounded-lg font-bold text-orange-400">3B</button>
+                        <button onclick="recordBatting('HR', '#eab308')" class="p-3 bg-yellow-600/20 hover:bg-yellow-600/40 border border-yellow-600/50 rounded-lg font-bold text-yellow-400">HR</button>
+                        <button onclick="recordBatting('BB', '#2563eb')" class="p-3 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-600/50 rounded-lg font-bold text-blue-400">BB</button>
+                        <button onclick="recordBatting('RBI', '#9333ea')" class="p-3 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-600/50 rounded-lg font-bold text-purple-400">RBI</button>
+                        <button onclick="recordBatting('OUT', '#475569')" class="p-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-bold">OUT</button>
+                        <button onclick="recordBatting('K', '#dc2626')" class="p-3 bg-red-600/20 hover:bg-red-600/40 border border-red-600/50 rounded-lg font-bold text-red-400">K</button>
+                        <button onclick="recordBatting('E', '#64748b')" class="p-3 bg-slate-600/20 hover:bg-slate-600/40 border border-slate-600/50 rounded-lg font-bold text-slate-300">ERR</button>
                     </div>
                 </div>
 
                 <div class="card p-6 border-t-4 border-red-500">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">⚾ Bullpen</h2>
-                        <div id="pitcher-sprite-container" class="h-12"></div>
+                        <h2 class="text-xl font-bold">⚾ Bullpen <span id="p-era-live" class="text-xs text-red-400 ml-2"></span></h2>
+                        <div id="pitcher-sprite-container" class="h-16 flex items-center"></div>
                     </div>
-                    <select id="activePitcher" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl"></select>
+                    <select id="activePitcher" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-red-500"></select>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="recordPitching('K', '#dc2626')" class="p-4 bg-red-600/20 border border-red-600/50 rounded-xl font-bold text-red-400">PONCHE (K)</button>
-                        <button onclick="recordPitching('OUT', '#475569')" class="p-4 bg-slate-700 border border-slate-600 rounded-xl font-bold">OUT</button>
-                        <button onclick="recordPitching('HIT', '#ea580c')" class="p-4 bg-orange-600/20 border border-orange-600/50 rounded-xl font-bold text-orange-400">HIT</button>
-                        <button onclick="recordPitching('BB', '#2563eb')" class="p-4 bg-blue-600/20 border border-blue-600/50 rounded-xl font-bold text-blue-400">BB</button>
-                        <button onclick="recordPitching('ER', '#fca5a5')" class="p-4 bg-red-900/40 border border-red-900/50 rounded-xl font-bold text-red-200 col-span-2">CARRERA PERMITIDA</button>
+                        <button onclick="recordPitching('K', '#dc2626')" class="p-4 bg-red-600/20 hover:bg-red-600/40 border border-red-600/50 rounded-xl font-bold text-red-400">PONCHE (K)</button>
+                        <button onclick="recordPitching('OUT', '#475569')" class="p-4 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-xl font-bold">OUT (Contacto)</button>
+                        <button onclick="recordPitching('HIT', '#ea580c')" class="p-4 bg-orange-600/20 hover:bg-orange-600/40 border border-orange-600/50 rounded-xl font-bold text-orange-400">HIT</button>
+                        <button onclick="recordPitching('BB', '#2563eb')" class="p-4 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-600/50 rounded-xl font-bold text-blue-400">BB</button>
+                        <button onclick="recordPitching('ER', '#fca5a5')" class="p-4 bg-red-900/40 hover:bg-red-900/60 border border-red-900/50 rounded-xl font-bold text-red-200">C. LIMPIA (ER)</button>
+                        <button onclick="recordPitching('UER', '#94a3b8')" class="p-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl font-bold text-slate-400 text-xs">C. SUCIA (UER)</button>
                     </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card p-5 bg-slate-900/80 border border-blue-900/30">
+                    <h3 class="text-xs font-black text-blue-500 uppercase mb-4">Registro de Bateo (Últimos)</h3>
+                    <div id="battingEvents" class="space-y-2 max-h-60 overflow-y-auto"></div>
+                </div>
+                <div class="card p-5 bg-slate-900/80 border border-red-900/30">
+                    <h3 class="text-xs font-black text-red-500 uppercase mb-4">Registro de Pitcheo (Últimos)</h3>
+                    <div id="pitchingEvents" class="space-y-2 max-h-60 overflow-y-auto"></div>
                 </div>
             </div>
         </section>
 
         <section id="section-stats" class="hidden space-y-6">
-            <div class="flex justify-between items-center border-b-2 border-blue-600 pb-2">
-                <h2 class="text-2xl font-black text-white uppercase">Estadísticas de Temporada</h2>
-                <button onclick="resetSeasonStats()" class="bg-red-600 hover:bg-red-700 text-[10px] font-black px-4 py-2 rounded-lg">RESETEAR NÚMEROS</button>
-            </div>
+            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-blue-600 pb-2">Estadísticas Acumuladas</h2>
             <div id="statsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
+            
+            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-red-600 pb-2 mt-8">Bitácora Completa de Partidos</h2>
+            <div class="card overflow-hidden">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-800 text-slate-400 uppercase text-[10px] font-black">
+                        <tr>
+                            <th class="p-4">Hora</th>
+                            <th class="p-4">Jugador</th>
+                            <th class="p-4">Acción</th>
+                            <th class="p-4 text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fullHistoryLog" class="divide-y divide-slate-700"></tbody>
+                </table>
+            </div>
         </section>
 
         <section id="section-setup" class="hidden">
@@ -152,12 +178,12 @@
                     <button onclick="addPlayer()" class="btn-primary px-5 py-2 rounded-lg font-black">AÑADIR</button>
                 </div>
                 <div id="playerList" class="space-y-2"></div>
-                <button onclick="clearHistory()" class="mt-8 text-red-500 text-xs font-black block mx-auto uppercase underline tracking-widest">Borrar Base de Datos</button>
+                <button onclick="clearHistory()" class="mt-8 text-red-500 text-xs font-black block mx-auto uppercase underline">Borrar Todo el Historial</button>
             </div>
         </section>
     </div>
 
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-300 bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black z-50 border-4 border-blue-600"></div>
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-300 bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black z-50 text-center border-4 border-blue-600"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
@@ -167,18 +193,29 @@
             apiKey: "AIzaSyBFCmkqnOiDWc5xvPct69euRqVWsbnbYAM",
             authDomain: "mlb-coop.firebaseapp.com",
             projectId: "mlb-coop",
+            storageBucket: "mlb-coop.firebasestorage.app",
+            messagingSenderId: "154154026747",
+            appId: "1:154154026747:web:845a3314288d82dfa3125e",
+            measurementId: "G-FL61M9P4QQ",
             databaseURL: "https://mlb-coop-default-rtdb.firebaseio.com"
         };
+
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let players = [];
         let isGameActive = false;
         let currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
+        let historyLogs = { batting: [], pitching: [] };
         let activeSelection = { batterId: "", pitcherId: "" };
 
+        const SPRITES = {
+            heman: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9iZCZjdD1z/3o7TKpXXqZ7XmN4gPS/giphy.gif",
+            skeletor: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9iZCZjdD1z/3o7TKpN3vV8hR8v98Y/giphy.gif"
+        };
+
         function save() {
-            db.ref('gameData').set({ players, score: currentGameScore, isGameActive, activeSelection });
+            db.ref('gameData').set({ players, score: currentGameScore, isGameActive, logs: historyLogs, activeSelection });
         }
 
         db.ref('gameData').on('value', (snapshot) => {
@@ -187,7 +224,10 @@
                 players = data.players || [];
                 currentGameScore = data.score || { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
                 isGameActive = data.isGameActive || false;
+                historyLogs = data.logs || { batting: [], pitching: [] };
                 activeSelection = data.activeSelection || { batterId: "", pitcherId: "" };
+                if(!historyLogs.batting) historyLogs.batting = [];
+                if(!historyLogs.pitching) historyLogs.pitching = [];
                 updateUI();
             }
         });
@@ -195,146 +235,20 @@
         function updateUI() {
             document.getElementById('score-runs').innerText = currentGameScore.runs;
             document.getElementById('score-allowed').innerText = currentGameScore.allowed;
-            document.getElementById('inning-display').innerText = `INNING: ${currentGameScore.inning}`;
+            document.getElementById('display-inning').innerText = currentGameScore.inning;
             
             const bDots = document.getElementById('bat-outs').children;
-            const pDots = document.getElementById('pitch-outs').children;
             for(let i=0; i<3; i++) {
                 bDots[i].style.backgroundColor = i < currentGameScore.batOuts ? '#3b82f6' : '#334155';
-                pDots[i].style.backgroundColor = i < currentGameScore.pitchOuts ? '#ef4444' : '#334155';
             }
 
             updateStatusUI();
+            renderLogs();
             renderStats();
             renderPlayerList();
             updateDropdowns();
-        }
-
-        function recordBatting(type, color) {
-            const pid = activeSelection.batterId;
-            if(!pid) return;
-            const p = players.find(x => x.id == pid);
-            if(!p.stats.extra) p.stats.extra = { h1: 0, h2: 0, h3: 0, bb: 0, outs: 0 };
-
-            if (['H','2B','3B','HR','OUT','K'].includes(type)) p.stats.atBats++;
-            if (['H','2B','3B','HR'].includes(type)) { p.stats.hits++; }
-            
-            if (type === 'H') p.stats.extra.h1++;
-            if (type === '2B') p.stats.extra.h2++;
-            if (type === '3B') p.stats.extra.h3++;
-            if (type === 'BB') p.stats.extra.bb++;
-            if (type === 'HR') { p.stats.hr++; p.stats.rbi++; currentGameScore.runs++; showHR(); }
-            if (type === 'RBI') { p.stats.rbi++; currentGameScore.runs++; }
-            if (type === 'OUT' || type === 'K') { p.stats.extra.outs++; currentGameScore.batOuts++; }
-
-            if (type !== 'RBI') rotatePlayer('batter');
-            if (currentGameScore.batOuts >= 3) { currentGameScore.batOuts = 0; showToast("CAMBIO DE LADO"); }
-            save();
-        }
-
-        function recordPitching(type, color) {
-            const pid = activeSelection.pitcherId;
-            if(!pid) return;
-            const p = players.find(x => x.id == pid);
-
-            if (type === 'K') { p.stats.pk++; currentGameScore.pitchOuts++; }
-            if (type === 'OUT') currentGameScore.pitchOuts++;
-            if (type === 'ER') { p.stats.pruns++; currentGameScore.allowed++; }
-            if (type === 'HIT' || type === 'BB') { /* Opcional: trackear hits recibidos */ }
-
-            if (currentGameScore.pitchOuts >= 3) {
-                currentGameScore.pitchOuts = 0;
-                rotatePlayer('pitcher');
-                showToast("INNING TERMINADO");
-            }
-            save();
-        }
-
-        function renderStats() {
-            document.getElementById('statsContainer').innerHTML = players.map(p => {
-                const rawAvg = p.stats.atBats > 0 ? (p.stats.hits / p.stats.atBats).toFixed(3) : "000";
-                const avgDisplay = rawAvg.toString().replace("0.", "").replace("1.000", "1000");
-                
-                // Cálculo ERA: (Carreras / Outs) * 3
-                const totalOuts = p.stats.pk + (p.stats.extra?.outs_pitched || 0); // Simplificado por ahora a outs de sistema
-                // Para este sistema usamos una aproximación basada en carreras permitidas
-                const era = p.stats.pruns > 0 ? ((p.stats.pruns * 3) / Math.max(1, (p.stats.pk/2))).toFixed(2) : "0.00";
-
-                return `
-                <div class="card p-5 border-l-4 border-blue-500">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-black uppercase">${p.name}</h3>
-                        <div class="flex gap-2">
-                            <span class="bg-blue-600 px-2 py-1 rounded text-[10px] font-bold text-white">AVG: ${avgDisplay}</span>
-                            <span class="bg-red-600 px-2 py-1 rounded text-[10px] font-bold text-white">ERA: ${era}</span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-4 gap-2 text-center">
-                        <div class="bg-slate-800 p-2 rounded">
-                            <p class="text-[8px] text-slate-400 uppercase">VB</p>
-                            <p class="text-md font-bold">${p.stats.atBats}</p>
-                        </div>
-                        <div class="bg-slate-800 p-2 rounded">
-                            <p class="text-[8px] text-slate-400 uppercase">H</p>
-                            <p class="text-md font-bold">${p.stats.hits}</p>
-                        </div>
-                        <div class="bg-slate-800 p-2 rounded">
-                            <p class="text-[8px] text-slate-400 uppercase">2B/3B</p>
-                            <p class="text-md font-bold">${(p.stats.extra?.h2||0)}/${(p.stats.extra?.h3||0)}</p>
-                        </div>
-                        <div class="bg-slate-800 p-2 rounded">
-                            <p class="text-[8px] text-slate-400 uppercase">HR</p>
-                            <p class="text-md font-bold">${p.stats.hr}</p>
-                        </div>
-                        <div class="bg-slate-800 p-2 rounded">
-                            <p class="text-[8px] text-slate-400 uppercase">RBI</p>
-                            <p class="text-md font-bold">${p.stats.rbi}</p>
-                        </div>
-                        <div class="bg-slate-800 p-2 rounded">
-                            <p class="text-[8px] text-slate-400 uppercase">BB</p>
-                            <p class="text-md font-bold">${p.stats.extra?.bb||0}</p>
-                        </div>
-                        <div class="bg-slate-800 p-2 rounded">
-                            <p class="text-[8px] text-slate-400 uppercase">K Pitch</p>
-                            <p class="text-md font-bold">${p.stats.pk}</p>
-                        </div>
-                        <div class="bg-slate-800 p-2 rounded">
-                            <p class="text-[8px] text-slate-400 uppercase">C. Perm</p>
-                            <p class="text-md font-bold text-red-400">${p.stats.pruns}</p>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-
-        function nextInning() {
-            currentGameScore.inning++;
-            currentGameScore.batOuts = 0;
-            currentGameScore.pitchOuts = 0;
-            showToast(`INNING ${currentGameScore.inning}`);
-            save();
-        }
-
-        function resetSeasonStats() {
-            if(confirm("¿Seguro que quieres poner todos los números en 0?")) {
-                players.forEach(p => {
-                    p.stats = { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0, extra: {h1:0, h2:0, h3:0, bb:0, outs:0} };
-                });
-                save();
-            }
-        }
-
-        function toggleGame() {
-            if (!isGameActive) {
-                if (players.length === 0) return;
-                isGameActive = true;
-                currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
-                activeSelection = { batterId: players[0].id, pitcherId: players[0].id };
-            } else {
-                if (!confirm("¿Finalizar partido?")) return;
-                isGameActive = false;
-            }
-            save();
+            updateCharacters();
+            renderFullHistory();
         }
 
         function rotatePlayer(type) {
@@ -345,12 +259,159 @@
             activeSelection[type === 'batter' ? 'batterId' : 'pitcherId'] = players[nextIndex].id;
         }
 
+        function recordBatting(type, color) {
+            const pid = activeSelection.batterId;
+            if(!pid) return showToast("⚠️ Selecciona un bateador");
+            const p = players.find(x => x.id == pid);
+            
+            const entry = { id: Date.now(), playerId: pid, type, color, side: 'batting', scoreSnapshot: {...currentGameScore} };
+
+            if (['H','2B','3B','HR','OUT','K'].includes(type)) p.stats.atBats++;
+            if (['H','2B','3B','HR'].includes(type)) p.stats.hits++;
+            if (type === 'HR') { p.stats.hr++; p.stats.rbi++; currentGameScore.runs++; showHR(); }
+            if (type === 'RBI') { p.stats.rbi++; currentGameScore.runs++; }
+            if (type === 'OUT' || type === 'K') currentGameScore.batOuts++;
+
+            addLog('batting', p.name, type, color, entry.id);
+            if (type !== 'RBI') rotatePlayer('batter');
+
+            if (currentGameScore.batOuts >= 3) {
+                showToast("🛑 3 OUTS - CAMBIO");
+                currentGameScore.batOuts = 0;
+            }
+            save();
+        }
+
+        function recordPitching(type, color) {
+            const pid = activeSelection.pitcherId;
+            if(!pid) return showToast("⚠️ Selecciona un pitcher");
+            const p = players.find(x => x.id == pid);
+
+            if(!p.stats.outs) p.stats.outs = 0;
+            if(!p.stats.uer) p.stats.uer = 0;
+
+            if (type === 'K') { p.stats.pk++; currentGameScore.pitchOuts++; p.stats.outs++; }
+            if (type === 'OUT') { currentGameScore.pitchOuts++; p.stats.outs++; }
+            if (type === 'ER') { p.stats.pruns++; currentGameScore.allowed++; }
+            if (type === 'UER') { p.stats.uer++; currentGameScore.allowed++; }
+
+            addLog('pitching', p.name, type, color, Date.now());
+
+            if (currentGameScore.pitchOuts >= 3) {
+                showToast("✅ INNING TERMINADO");
+                currentGameScore.pitchOuts = 0;
+                currentGameScore.inning++;
+                rotatePlayer('pitcher');
+            }
+            save();
+        }
+
+        function deleteLog(side, timestamp) {
+            if(!confirm("¿Borrar este registro y revertir estadísticas?")) return;
+            
+            const logIndex = historyLogs[side].findIndex(l => l.timestamp === timestamp);
+            if(logIndex === -1) return;
+            
+            const log = historyLogs[side][logIndex];
+            const p = players.find(x => x.name === log.name);
+
+            if(p) {
+                if(side === 'batting') {
+                    if (['H','2B','3B','HR','OUT','K'].includes(log.type)) p.stats.atBats--;
+                    if (['H','2B','3B','HR'].includes(log.type)) p.stats.hits--;
+                    if (log.type === 'HR') { p.stats.hr--; p.stats.rbi--; currentGameScore.runs--; }
+                    if (log.type === 'RBI') { p.stats.rbi--; currentGameScore.runs--; }
+                    if (log.type === 'OUT' || log.type === 'K') currentGameScore.batOuts = Math.max(0, currentGameScore.batOuts - 1);
+                } else {
+                    if (log.type === 'K') { p.stats.pk--; currentGameScore.pitchOuts = Math.max(0, currentGameScore.pitchOuts - 1); p.stats.outs--; }
+                    if (log.type === 'OUT') { currentGameScore.pitchOuts = Math.max(0, currentGameScore.pitchOuts - 1); p.stats.outs--; }
+                    if (log.type === 'ER') { p.stats.pruns--; currentGameScore.allowed--; }
+                    if (log.type === 'UER') { p.stats.uer--; currentGameScore.allowed--; }
+                }
+            }
+            
+            historyLogs[side].splice(logIndex, 1);
+            save();
+        }
+
+        function calculateERA(p) {
+            const innings = (p.stats.outs || 0) / 3;
+            if (innings === 0) return "0.00";
+            return ((p.stats.pruns * 9) / innings).toFixed(2);
+        }
+
+        function addLog(side, name, type, color, timestamp) {
+            const log = { name, type, color, timestamp, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
+            historyLogs[side].unshift(log);
+            if (historyLogs[side].length > 50) historyLogs[side].pop();
+        }
+
+        function renderLogs() {
+            const template = (l, side) => `
+                <div class="flex justify-between items-center p-2 bg-slate-800 rounded border-l-4 mb-1 group" style="border-color: ${l.color}">
+                    <div>
+                        <span class="font-bold text-sm">${l.name}</span>
+                        <span class="font-black ml-2" style="color: ${l.color}">${l.type}</span>
+                    </div>
+                    <button onclick="deleteLog('${side}', ${l.timestamp})" class="opacity-0 group-hover:opacity-100 bg-red-500 text-white text-[10px] px-2 py-1 rounded transition-all">BORRAR</button>
+                </div>`;
+
+            document.getElementById('battingEvents').innerHTML = (historyLogs.batting || []).slice(0, 8).map(l => template(l, 'batting')).join('');
+            document.getElementById('pitchingEvents').innerHTML = (historyLogs.pitching || []).slice(0, 8).map(l => template(l, 'pitching')).join('');
+        }
+
+        function renderFullHistory() {
+            const all = [
+                ...(historyLogs.batting || []).map(l => ({...l, side: 'BAT'})),
+                ...(historyLogs.pitching || []).map(l => ({...l, side: 'PITCH'}))
+            ].sort((a, b) => b.timestamp - a.timestamp);
+
+            document.getElementById('fullHistoryLog').innerHTML = all.map(l => `
+                <tr class="hover:bg-slate-800/50 transition-colors">
+                    <td class="p-4 text-slate-500 font-mono text-xs">${l.time}</td>
+                    <td class="p-4 font-bold text-blue-400">${l.name}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded text-[10px] font-black" style="background: ${l.color}33; color: ${l.color}">${l.type}</span></td>
+                    <td class="p-4 text-right"><span class="text-slate-600 font-bold text-[10px]">${l.side}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderStats() {
+            document.getElementById('statsContainer').innerHTML = players.map(p => {
+                const avg = p.stats.atBats > 0 ? (p.stats.hits / p.stats.atBats).toFixed(3) : ".000";
+                const era = calculateERA(p);
+                const ip = Math.floor((p.stats.outs || 0)/3) + "." + ((p.stats.outs || 0)%3);
+                
+                return `
+                <div class="card p-5 border-l-4 ${p.name.toLowerCase().includes('beto') ? 'border-blue-500' : 'border-red-500'}">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="text-xl font-black uppercase">${p.name}</h3>
+                            <p class="text-[10px] text-slate-400">IP: ${ip} | UER: ${p.stats.uer || 0}</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="bg-blue-600 px-2 py-1 rounded text-[10px] font-bold">AVG: ${avg}</span>
+                            <span class="bg-red-600 px-2 py-1 rounded text-[10px] font-bold ml-1">ERA: ${era}</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div><p class="text-[10px] text-slate-400">HITS</p><p class="text-lg font-bold">${p.stats.hits}</p></div>
+                        <div><p class="text-[10px] text-slate-400">HR</p><p class="text-lg font-bold">${p.stats.hr}</p></div>
+                        <div><p class="text-[10px] text-slate-400">RBI</p><p class="text-lg font-bold">${p.stats.rbi}</p></div>
+                        <div><p class="text-[10px] text-slate-400">K</p><p class="text-lg font-bold">${p.stats.pk}</p></div>
+                        <div><p class="text-[10px] text-slate-400">ER</p><p class="text-lg font-bold text-red-400">${p.stats.pruns || 0}</p></div>
+                        <div><p class="text-[10px] text-slate-400">AB</p><p class="text-lg font-bold">${p.stats.atBats}</p></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // --- FUNCIONES DE SOPORTE IGUALES O SIMILARES ---
         function updateDropdowns() {
             const bSelect = document.getElementById('activeBatter');
             const pSelect = document.getElementById('activePitcher');
             const options = '<option value="">ELIJE JUGADOR</option>' + players.map(p => `<option value="${p.id}">${p.name.toUpperCase()}</option>`).join('');
-            bSelect.innerHTML = options;
-            pSelect.innerHTML = options;
+            bSelect.innerHTML = options; pSelect.innerHTML = options;
             if(activeSelection.batterId) bSelect.value = activeSelection.batterId;
             if(activeSelection.pitcherId) pSelect.value = activeSelection.pitcherId;
         }
@@ -361,6 +422,29 @@
             save();
         }
 
+        function updateCharacters() {
+            const bName = (players.find(p => p.id == activeSelection.batterId)?.name || "").toLowerCase();
+            const pName = (players.find(p => p.id == activeSelection.pitcherId)?.name || "").toLowerCase();
+            document.getElementById('batter-sprite-container').innerHTML = bName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : (bName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : "");
+            document.getElementById('pitcher-sprite-container').innerHTML = pName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : (pName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : "");
+            
+            const pObj = players.find(p => p.id == activeSelection.pitcherId);
+            document.getElementById('p-era-live').innerText = pObj ? `ERA: ${calculateERA(pObj)}` : "";
+        }
+
+        function toggleGame() {
+            if (!isGameActive) {
+                if (players.length === 0) return showToast("⚠️ ¡Añade jugadores!");
+                isGameActive = true;
+                currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
+                activeSelection = { batterId: players[0].id, pitcherId: players[0].id };
+            } else {
+                if (!confirm("¿Finalizar partido?")) return;
+                isGameActive = false;
+            }
+            save();
+        }
+
         function updateStatusUI() {
             const controls = document.getElementById('game-controls');
             const btn = document.getElementById('btn-toggle-game');
@@ -368,15 +452,15 @@
             if (isGameActive) {
                 controls.classList.remove('opacity-30', 'pointer-events-none');
                 document.getElementById('game-btn-text').innerText = "FINALIZAR PARTIDO";
-                btn.className = "px-8 py-3 bg-red-600 hover:bg-red-500 text-white rounded-full font-black text-lg shadow-lg flex items-center gap-3";
+                btn.className = "px-8 py-3 bg-red-600 hover:bg-red-500 text-white rounded-full font-black text-lg shadow-lg transform transition-all active:scale-95 flex items-center gap-3";
                 indicator.innerText = "• PARTIDO EN VIVO •";
-                indicator.className = "px-4 py-1 rounded-full text-xs font-black bg-green-500/20 text-green-400 border border-green-500/50 w-fit";
+                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-green-500/20 text-green-400 border border-green-500/50 w-fit";
             } else {
                 controls.classList.add('opacity-30', 'pointer-events-none');
                 document.getElementById('game-btn-text').innerText = "EMPEZAR PARTIDO";
-                btn.className = "px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-full font-black text-lg shadow-lg flex items-center gap-3";
+                btn.className = "px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-full font-black text-lg shadow-lg transform transition-all active:scale-95 flex items-center gap-3";
                 indicator.innerText = "ESPERANDO PARTIDO";
-                indicator.className = "px-4 py-1 rounded-full text-xs font-black bg-red-500/20 text-red-400 border border-red-500/50 w-fit";
+                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/50 w-fit";
             }
         }
 
@@ -384,9 +468,8 @@
             const input = document.getElementById('playerNameInput');
             const name = input.value.trim();
             if (name) {
-                players.push({ id: Date.now(), name, stats: { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0, extra: {h1:0, h2:0, h3:0, bb:0, outs:0} } });
-                input.value = '';
-                save();
+                players.push({ id: Date.now(), name, stats: { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0, outs:0, uer:0 } });
+                input.value = ''; save();
             }
         }
 
@@ -395,11 +478,10 @@
                 <div class="flex justify-between p-3 bg-slate-800 rounded-xl mb-2 border border-slate-700">
                     <span>👤 ${p.name}</span>
                     <button onclick="removePlayer(${p.id})" class="text-red-400">✕</button>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
-        function removePlayer(id) { if(confirm("¿Eliminar jugador de la base de datos?")) { players = players.filter(p => p.id !== id); save(); } }
+        function removePlayer(id) { if(confirm("¿Eliminar?")) { players = players.filter(p => p.id !== id); save(); } }
 
         function viewSection(id) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
@@ -409,9 +491,10 @@
         }
 
         function clearHistory() {
-            if(confirm("ESTO BORRARÁ TODO (JUGADORES Y NÚMEROS). ¿CONTINUAR?")) {
+            if(confirm("¿BORRAR TODO?")) {
                 players = []; isGameActive = false;
                 currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
+                historyLogs = { batting: [], pitching: [] };
                 activeSelection = { batterId: "", pitcherId: "" };
                 save();
             }
@@ -419,14 +502,13 @@
 
         function showHR() {
             const ov = document.getElementById('hr-overlay');
-            ov.style.display = 'flex';
-            setTimeout(() => ov.style.display = 'none', 2500);
+            ov.style.display = 'flex'; setTimeout(() => ov.style.display = 'none', 3500);
         }
 
         function showToast(m) {
             const t = document.getElementById('toast');
             t.innerText = m; t.classList.remove('opacity-0', 'translate-y-24');
-            setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2000);
+            setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2500);
         }
 
         window.onload = () => viewSection('game');
