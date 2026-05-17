@@ -43,3 +43,58 @@ El archivo principal está autocontenido en un solo documento para facilitar su 
     │   ├── Vista Stats # Dashboard de estadísticas acumuladas y bitácora histórica
     │   └── Vista Setup # Gestión de roster del equipo y limpieza de datos
     └── <script>        # Configuración de Firebase y Máquina de Estados del juego
+
+```
+
+---
+
+## 🔧 Configuración e Instalación
+
+Al ser un prototipo basado en un único archivo HTML, **no requiere instalación de dependencias locales (Node.js/npm)**.
+
+1. **Clona o descarga** el archivo a tu máquina local.
+2. (Opcional) Modifica las credenciales de Firebase en el objeto `firebaseConfig` dentro de la etiqueta `<script>` si deseas usar tu propia base de datos:
+
+```text
+const firebaseConfig = {
+    apiKey: "TU_API_KEY",
+    authDomain: "TU_AUTH_DOMAIN",
+    projectId: "TU_PROJECT_ID",
+    databaseURL: "TU_DATABASE_URL"
+};
+
+
+```
+
+
+
+```
+3.  **Abre el archivo** `index.html` en cualquier navegador web moderno. ¡Eso es todo!
+
+---
+
+## 🎮 Instrucciones de Uso
+
+### 1. Preparación del Roster
+*   Dirígete a la pestaña **⚙️ Equipo**.
+*   Agrega los nombres de los jugadores que participarán. *(Tip: prueba ingresando "Beto" o "Nasa" para activar los sprites especiales).*
+
+### 2. Durante el Partido
+*   En la pestaña **🎮 Juego**, haz clic en **EMPEZAR PARTIDO** para activar los controles.
+*   Selecciona al bateador y pitcher actuales en los menús desplegables.
+*   Presiona los botones correspondientes a medida que ocurren los eventos en la consola/juego. 
+*   **Rotación automática:** El sistema rotará automáticamente los jugadores al registrar turnos ofensivos completos o cambios de inning tras 3 outs.
+
+### 3. Revisión de Datos
+*   Consulta la pestaña **📊 Histórico** en cualquier momento para analizar el rendimiento acumulado de la temporada en formato de tarjetas visuales, o audita las jugadas jugada por jugada en la **Bitácora Completa**.
+
+---
+
+## 📝 Notas del Prototipo
+*   La base de datos actual integrada utiliza credenciales de prueba expuestas para facilitar el despliegue inmediato del prototipo. Para entornos de producción, se recomienda mover estas variables a un archivo de entorno protegido y activar las reglas de seguridad en la consola de Firebase.
+
+```
+
+```
+
+```
