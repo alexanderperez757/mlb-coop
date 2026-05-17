@@ -63,12 +63,9 @@ const firebaseConfig = {
     databaseURL: "TU_DATABASE_URL"
 };
 
-
 ```
 
-
-
-```
+---
 3.  **Abre el archivo** `index.html` en cualquier navegador web moderno. ¡Eso es todo!
 
 ---
