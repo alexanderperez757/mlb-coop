@@ -90,4 +90,31 @@ const firebaseConfig = {
 ## 📝 Notas del Prototipo
 *   La base de datos actual integrada utiliza credenciales de prueba expuestas para facilitar el despliegue inmediato del prototipo. Para entornos de producción, se recomienda mover estas variables a un archivo de entorno protegido y activar las reglas de seguridad en la consola de Firebase.
 
+## 📌 Próximos Desarrollos (Roadmap de Pendientes) 🛠️
+
+Las siguientes funciones y mejoras están planificadas para implementarse en las próximas iteraciones del prototipo:
+
+### ⚾ Funcionalidades de Béisbol Avanzadas
+
+* [ ] **Soporte para Doble Plays (DP):** Añadir botón interactivo que registre automáticamente 2 outs simultáneos en el marcador de la entrada actual y actualice los turnos de bateo de manera acorde.
+* [ ] **Control de Corredores en Base:**
+* Registrar **Out Robando Base (CS)** (afecta el conteo de outs del inning sin penalizar el turno del bateador actual).
+* Registrar **Bases Robadas (SB)** para acumular estadísticas ofensivas individuales.
+
+
+* [ ] **Tipos de Outs Detallados:** Diferenciar en la interfaz entre *Flyout* (elevado), *Groundout* (rodado) y *Lineout* (línea) para generar gráficos de tendencia de bateo.
+* [ ] **Módulo de Errores Defensivos:** Permitir asignar un error directamente a un jugador específico en el lineup para calcular métricas de fildeo en la pestaña de estadísticas.
+
+### 💻 Mejoras Técnicas y de Interfaz
+
+* [ ] **Autenticación de Usuarios:** Integrar Firebase Auth para que cada grupo cooperativo ("Beto y Nasa", etc.) tenga su propia sesión privada y no compartan la misma base de datos global.
+* [ ] **Persistencia Local de Respaldo:** Implementar *LocalStorage* para que el juego guarde un estado de respaldo local en caso de que ocurra una desconexión a internet a mitad del partido.
+* [ ] **Exportación de Datos:** Añadir un botón para descargar las estadísticas acumuladas o la bitácora completa en formato CSV/Excel.
+
+---
+
+## 📝 Notas del Prototipo
+
+* La base de datos actual integrada utiliza credenciales de prueba expuestas para facilitar el despliegue inmediato del prototipo. Para entornos de producción, se recomienda mover estas variables a un archivo de entorno protegido y activar las reglas de seguridad en la consola de Firebase.
+
 ```
