@@ -112,9 +112,3 @@ Las siguientes funciones y mejoras están planificadas para implementarse en las
 * [ ] **Exportación de Datos:** Añadir un botón para descargar las estadísticas acumuladas o la bitácora completa en formato CSV/Excel.
 
 ---
-
-## 📝 Notas del Prototipo
-
-* La base de datos actual integrada utiliza credenciales de prueba expuestas para facilitar el despliegue inmediato del prototipo. Para entornos de producción, se recomienda mover estas variables a un archivo de entorno protegido y activar las reglas de seguridad en la consola de Firebase.
-
-```
