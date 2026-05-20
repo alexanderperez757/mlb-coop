@@ -9,8 +9,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; transition: background-color 0.3s; overflow-x: hidden; }
         .card { background-color: #1e293b; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); transition: all 0.2s; }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); }
+        .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); transition: all 0.2s; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
         .scoreboard-font { font-family: 'Courier New', Courier, monospace; }
         
         #hr-overlay {
@@ -29,8 +29,8 @@
         .hr-text {
             font-size: 5rem;
             font-weight: 900;
-            color: #fbbf24;
-            text-shadow: 0 0 20px #fbbf24, 0 0 40px #d97706;
+            color: #fde047;
+            text-shadow: 0 0 20px #fde047, 0 0 40px #eab308;
             animation: hr-bounce 0.5s infinite alternate;
         }
         @keyframes hr-bounce { from { transform: scale(1); } to { transform: scale(1.05); } }
@@ -44,7 +44,7 @@
         .base-1 { top: 0; right: 0; }
         .base-2 { top: 0; left: 0; }
         .base-3 { bottom: 0; left: 0; }
-        .base-active { background-color: #fbbf24; border-color: #f59e0b; box-shadow: 0 0 8px #fbbf24; }
+        .base-active { background-color: #fde047; border-color: #eab308; box-shadow: 0 0 8px #fde047; }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #1e293b; }
@@ -62,7 +62,7 @@
     <div class="max-w-6xl mx-auto">
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <div>
-                <h1 class="text-3xl font-extrabold text-white tracking-tight">MLB THE SHOW <span class="text-blue-500">26 COOP</span></h1>
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">MLB THE SHOW <span class="text-blue-400">26 COOP</span></h1>
                 <p class="text-slate-400 font-medium italic">Beto vs Nasa Edition</p>
             </div>
             <div class="flex gap-2 bg-slate-800 p-1 rounded-xl">
@@ -72,15 +72,15 @@
             </div>
         </header>
 
-        <div id="live-scoreboard" class="card p-5 mb-6 border-b-4 border-blue-600 flex flex-col md:flex-row justify-between items-center bg-slate-900 gap-6">
+        <div id="live-scoreboard" class="card p-5 mb-6 border-b-4 border-blue-500 flex flex-col md:flex-row justify-between items-center bg-slate-900 data-slate-900 gap-6">
             <div class="flex flex-col gap-3 w-full md:w-auto">
-                <div id="game-status-indicator" class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/50 w-fit">
+                <div id="game-status-indicator" class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-300 border border-red-500/30 w-fit">
                     ESPERANDO PARTIDO
                 </div>
                 <div class="flex gap-8 items-center">
                     <div>
-                        <p class="text-[10px] text-blue-400 font-black uppercase mb-2 tracking-tighter">
-                            Inning <span id="display-inning" class="text-white ml-1">1</span> <span id="display-part" class="text-yellow-400 ml-1">ALTA</span>
+                        <p class="text-[10px] text-blue-300 font-black uppercase mb-2 tracking-tighter">
+                            Inning <span id="display-inning" class="text-white ml-1">1</span> <span id="display-part" class="text-yellow-200 ml-1">ALTA</span>
                         </p>
                         <div class="flex flex-col gap-1 mb-2">
                             <p class="text-[9px] text-slate-400 font-bold uppercase">Outs Bat: <span id="text-outs-bat" class="text-white font-mono">0</span></p>
@@ -101,7 +101,7 @@
                     </div>
 
                     <div class="flex flex-col items-center bg-slate-800/30 p-2 rounded-xl border border-slate-700/50">
-                        <p class="text-[9px] text-yellow-500 font-black uppercase tracking-tighter mb-1">Bases</p>
+                        <p class="text-[9px] text-yellow-400 font-black uppercase tracking-tighter mb-1">Bases</p>
                         <div class="diamond-container">
                             <div id="base-1" class="base-pad base-1" title="1ra Base" onclick="manualToggleBase(1)"></div>
                             <div id="base-2" class="base-pad base-2" title="2da Base" onclick="manualToggleBase(2)"></div>
@@ -113,12 +113,12 @@
             
             <div class="flex gap-8 md:gap-12 items-center bg-slate-800/50 px-8 py-4 rounded-2xl border border-slate-700">
                 <div class="text-center">
-                    <p class="text-[10px] text-blue-400 font-black uppercase mb-1">Anotadas</p>
+                    <p class="text-[10px] text-blue-300 font-black uppercase mb-1">Anotadas</p>
                     <span id="score-runs" class="scoreboard-font text-5xl text-white">0</span>
                 </div>
                 <div class="text-slate-600 text-3xl font-black">VS</div>
                 <div class="text-center">
-                    <p class="text-[10px] text-red-500 font-black uppercase mb-1">Permitidas</p>
+                    <p class="text-[10px] text-red-300 font-black uppercase mb-1">Permitidas</p>
                     <span id="score-allowed" class="scoreboard-font text-5xl text-white">0</span>
                 </div>
             </div>
@@ -126,78 +126,78 @@
 
         <section id="section-game" class="space-y-6">
             <div class="flex flex-col sm:flex-row justify-center gap-4 mb-4">
-                <button id="btn-toggle-game" onclick="toggleGame()" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-full font-black text-lg shadow-lg transform transition-all active:scale-95 flex items-center gap-3">
+                <button id="btn-toggle-game" onclick="toggleGame()" class="px-8 py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-full font-black text-lg shadow-lg transform transition-all active:scale-95 flex items-center gap-3">
                     <span id="game-btn-icon">🏏</span> <span id="game-btn-text">EMPEZAR PARTIDO</span>
                 </button>
             </div>
 
             <div id="game-controls" class="opacity-30 pointer-events-none transition-all duration-300 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="card p-6 border-t-4 border-blue-500">
+                <div class="card p-6 border-t-4 border-blue-400">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">🏏 Ofensiva - Lineup</h2>
+                        <h2 class="text-xl font-bold text-slate-200">🏏 Ofensiva - Lineup</h2>
                         <div id="batter-sprite-container" class="h-16 flex items-center"></div>
                     </div>
-                    <select id="activeBatter" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-blue-500"></select>
+                    <select id="activeBatter" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-blue-400"></select>
                     
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="recordBatting('H', '#22c55e')" class="p-3 bg-green-500 text-slate-950 rounded-lg font-black hover:bg-green-400 shadow-md">1B (Hit)</button>
-                        <button onclick="recordBatting('2B', '#10b981')" class="p-3 bg-emerald-500 text-slate-950 rounded-lg font-black hover:bg-emerald-400 shadow-md">2B</button>
-                        <button onclick="recordBatting('3B', '#f97316')" class="p-3 bg-orange-500 text-slate-950 rounded-lg font-black hover:bg-orange-400 shadow-md">3B</button>
+                        <button onclick="recordBatting('H', '#a7f3d0')" class="p-3 bg-emerald-900/40 text-emerald-200 border border-emerald-700/50 rounded-lg font-bold hover:bg-emerald-800/40 transition-colors">1B (Hit)</button>
+                        <button onclick="recordBatting('2B', '#99f6e4')" class="p-3 bg-teal-900/40 text-teal-200 border border-teal-700/50 rounded-lg font-bold hover:bg-teal-800/40 transition-colors">2B</button>
+                        <button onclick="recordBatting('3B', '#ffedd5')" class="p-3 bg-orange-950/40 text-orange-200 border border-orange-800/40 rounded-lg font-bold hover:bg-orange-900/40 transition-colors">3B</button>
                         
-                        <button onclick="recordBatting('HR', '#eab308')" class="p-3 bg-yellow-400 text-slate-950 rounded-lg font-black hover:bg-yellow-300 shadow-lg border-2 border-yellow-500 animate-pulse">🔥 HR</button>
-                        <button onclick="recordBatting('BB', '#3b82f6')" class="p-3 bg-blue-500 text-white rounded-lg font-black hover:bg-blue-400 shadow-md">BB (Walk)</button>
-                        <button onclick="recordBatting('RBI', '#a855f7')" class="p-3 bg-purple-500 text-white rounded-lg font-black hover:bg-purple-400 shadow-md">🎯 RBI (+1 Carr)</button>
+                        <button onclick="recordBatting('HR', '#fef08a')" class="p-3 bg-yellow-950/60 text-yellow-200 border-2 border-yellow-600/60 rounded-lg font-black hover:bg-yellow-900/60 transition-colors shadow-sm">⭐ HR</button>
+                        <button onclick="recordBatting('BB', '#bfdbfe')" class="p-3 bg-blue-950/50 text-blue-200 border border-blue-700/50 rounded-lg font-bold hover:bg-blue-900/40 transition-colors">BB (Walk)</button>
+                        <button onclick="recordBatting('RBI', '#f3e8ff')" class="p-3 bg-purple-950/50 text-purple-200 border border-purple-700/50 rounded-lg font-bold hover:bg-purple-900/40 transition-colors">🎯 RBI (+1)</button>
                         
-                        <button onclick="recordBatting('OUT', '#64748b')" class="p-3 bg-slate-600 text-white rounded-lg font-bold hover:bg-slate-500 text-xs uppercase">Fly / Ground</button>
-                        <button onclick="recordBatting('K', '#ef4444')" class="p-3 bg-red-600 text-white rounded-lg font-black hover:bg-red-500 text-sm">K Recibido</button>
-                        <button onclick="recordBatting('E', '#475569')" class="p-3 bg-slate-700 text-slate-300 rounded-lg font-bold hover:bg-slate-600 text-xs">Error Bat</button>
+                        <button onclick="recordBatting('OUT', '#cbd5e1')" class="p-3 bg-slate-800 text-slate-400 border border-slate-700 rounded-lg font-medium hover:bg-slate-700 text-xs uppercase">Fly / Ground</button>
+                        <button onclick="recordBatting('K', '#fecaca')" class="p-3 bg-red-950/50 text-red-300 border border-red-800/40 rounded-lg font-bold hover:bg-red-900/40 text-sm">K Recibido</button>
+                        <button onclick="recordBatting('E', '#94a3b8')" class="p-3 bg-slate-800/60 text-slate-400 border border-slate-700/60 rounded-lg font-medium hover:bg-slate-700 text-xs">Error Bat</button>
                         
-                        <button onclick="recordBatting('BR', '#06b6d4')" class="p-3 bg-cyan-500 text-slate-950 rounded-lg font-black hover:bg-cyan-400 text-xs shadow-md">🏃‍♂️ BASE ROBADA</button>
-                        <button onclick="recordBatting('OR', '#f43f5e')" class="p-3 bg-rose-500 text-white rounded-lg font-black hover:bg-rose-400 text-xs shadow-md">🛑 OUT ROBANDO</button>
-                        <button onclick="recordBatting('OC', '#e11d48')" class="p-3 bg-rose-700 text-white rounded-lg font-black hover:bg-rose-600 text-xs shadow-md border border-rose-400">⚠️ OUT EN CARRERA</button>
+                        <button onclick="recordBatting('BR', '#cffafe')" class="p-3 bg-cyan-950/50 text-cyan-200 border border-cyan-800/50 rounded-lg font-bold hover:bg-cyan-900/40 text-xs">🏃‍♂️ BASE ROBADA</button>
+                        <button onclick="recordBatting('OR', '#ffe4e6')" class="p-3 bg-rose-950/40 text-rose-300 border border-rose-800/40 rounded-lg font-bold hover:bg-rose-900/40 text-xs">🛑 OUT ROBANDO</button>
+                        <button onclick="recordBatting('OC', '#fca5a5')" class="p-3 bg-rose-950/60 text-rose-200 border border-rose-700 rounded-lg font-black hover:bg-rose-900/60 text-xs">⚠️ OUT CARRERA</button>
                     </div>
                 </div>
 
-                <div class="card p-6 border-t-4 border-red-500">
+                <div class="card p-6 border-t-4 border-red-400">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">⚾ Defensiva - Bullpen</h2>
+                        <h2 class="text-xl font-bold text-slate-200">⚾ Defensiva - Bullpen</h2>
                         <div id="pitcher-sprite-container" class="h-16 flex items-center"></div>
                     </div>
-                    <select id="activePitcher" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-red-500"></select>
+                    <select id="activePitcher" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-red-400"></select>
                     
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="recordPitching('K', '#b91c1c')" class="p-3 bg-red-700 text-white rounded-xl font-black hover:bg-red-600 shadow-md">🔥 PONCHE (K)</button>
-                        <button onclick="recordPitching('OUT', '#475569')" class="p-3 bg-slate-700 text-slate-200 rounded-xl font-black hover:bg-slate-600 shadow-md">OUT (Contacto)</button>
+                        <button onclick="recordPitching('K', '#fca5a5')" class="p-3 bg-red-950/60 text-red-200 border border-red-700/60 rounded-xl font-bold hover:bg-red-900/50 transition-colors">🔥 PONCHE (K)</button>
+                        <button onclick="recordPitching('OUT', '#cbd5e1')" class="p-3 bg-slate-800 text-slate-300 border border-slate-700 rounded-xl font-bold hover:bg-slate-700 transition-colors">OUT (Contacto)</button>
                         
-                        <button onclick="recordPitching('HIT', '#ea580c')" class="p-3 bg-orange-600/30 text-orange-400 border-2 border-orange-500 rounded-xl font-black hover:bg-orange-600/50">HIT Recibido</button>
-                        <button onclick="recordPitching('BB', '#2563eb/30')" class="p-3 bg-blue-600/30 text-blue-400 border-2 border-blue-500 rounded-xl font-black hover:bg-blue-600/50">BB (Caminado)</button>
+                        <button onclick="recordPitching('HIT', '#ffedd5')" class="p-3 bg-orange-950/30 text-orange-300 border border-orange-800/40 rounded-xl font-bold hover:bg-orange-900/30">HIT Recibido</button>
+                        <button onclick="recordPitching('BB', '#bfdbfe')" class="p-3 bg-blue-950/30 text-blue-300 border border-blue-800/40 rounded-xl font-bold hover:bg-blue-900/30">BB (Caminado)</button>
                         
-                        <button onclick="recordPitching('ER', '#dc2626')" class="p-3 bg-red-600/20 text-red-300 border border-red-600 rounded-xl font-bold hover:bg-red-600/30">Carrera Limpia</button>
-                        <button onclick="recordPitching('UER', '#94a3b8')" class="p-3 bg-slate-800 text-slate-400 border border-slate-600 rounded-xl font-bold hover:bg-slate-700">Carrera Sucia</button>
+                        <button onclick="recordPitching('ER', '#ffe4e6')" class="p-3 bg-rose-950/30 text-rose-300 border border-rose-900/30 rounded-xl font-medium hover:bg-rose-900/40">Carrera Limpia</button>
+                        <button onclick="recordPitching('UER', '#e2e8f0')" class="p-3 bg-slate-800 text-slate-400 border border-slate-700 rounded-xl font-medium hover:bg-slate-700">Carrera Sucia</button>
                         
-                        <button onclick="recordPitching('AR', '#8b5cf6')" class="p-3 bg-violet-600 text-white rounded-xl font-black hover:bg-violet-500 text-xs shadow-md">⚡ ATRAPADO ROBANDO</button>
-                        <button onclick="recordPitching('E_D', '#f97316')" class="p-3 bg-orange-500 text-slate-950 rounded-xl font-black hover:bg-orange-400 text-xs shadow-md">❌ ERROR DEFENSIVO</button>
+                        <button onclick="recordPitching('AR', '#e0e7ff')" class="p-3 bg-indigo-950/50 text-indigo-200 border border-indigo-800/50 rounded-xl font-bold hover:bg-indigo-900/40 text-xs">⚡ ATRAPADO ROBANDO</button>
+                        <button onclick="recordPitching('E_D', '#fed7aa')" class="p-3 bg-amber-950/50 text-amber-200 border border-amber-800/50 rounded-xl font-bold hover:bg-amber-900/40 text-xs">❌ ERROR DEFENSIVO</button>
                     </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="card p-5 bg-slate-900/80 border border-blue-900/30">
-                    <h3 class="text-xs font-black text-blue-500 uppercase mb-4">Eventos Recientes (Bateo)</h3>
+                    <h3 class="text-xs font-black text-blue-400 uppercase mb-4">Eventos Recientes (Bateo)</h3>
                     <div id="battingEvents" class="space-y-2 max-h-60 overflow-y-auto"></div>
                 </div>
                 <div class="card p-5 bg-slate-900/80 border border-red-900/30">
-                    <h3 class="text-xs font-black text-red-500 uppercase mb-4">Eventos Recientes (Pitcheo)</h3>
+                    <h3 class="text-xs font-black text-red-400 uppercase mb-4">Eventos Recientes (Pitcheo)</h3>
                     <div id="pitchingEvents" class="space-y-2 max-h-60 overflow-y-auto"></div>
                 </div>
             </div>
         </section>
 
         <section id="section-stats" class="hidden space-y-8">
-            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-blue-600 pb-2 italic">Dashboard de Jugadores</h2>
+            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-blue-500 pb-2 italic">Dashboard de Jugadores</h2>
             <div id="statsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
             
-            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-red-600 pb-2 italic">Bitácora Completa de Jugadas</h2>
+            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-red-500 pb-2 italic">Bitácora Completa de Jugadas</h2>
             <div class="card overflow-hidden">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-slate-800 text-slate-400 uppercase text-[10px] font-black">
@@ -226,7 +226,7 @@
         </section>
     </div>
 
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-300 bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black z-50 text-center border-4 border-blue-600"></div>
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-300 bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black z-50 text-center border-4 border-blue-500"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
@@ -289,13 +289,13 @@
             document.getElementById('text-outs-bat').innerText = currentGameScore.batOuts;
             const bDots = document.getElementById('bat-outs').children;
             for(let i=0; i<3; i++) {
-                bDots[i].style.backgroundColor = i < currentGameScore.batOuts ? '#3b82f6' : '#334155';
+                bDots[i].style.backgroundColor = i < currentGameScore.batOuts ? '#60a5fa' : '#334155';
             }
 
             document.getElementById('text-outs-pitch').innerText = currentGameScore.pitchOuts;
             const pDots = document.getElementById('pitch-outs').children;
             for(let i=0; i<3; i++) {
-                pDots[i].style.backgroundColor = i < currentGameScore.pitchOuts ? '#dc2626' : '#334155';
+                pDots[i].style.backgroundColor = i < currentGameScore.pitchOuts ? '#f87171' : '#334155';
             }
 
             for(let b=1; b<=3; b++) {
@@ -348,7 +348,6 @@
             if (type === '2B') { p.stats.h2b = (p.stats.h2b || 0) + 1; shiftBases(2); }
             if (type === '3B') { p.stats.h3b = (p.stats.h3b || 0) + 1; shiftBases(3); }
             
-            // CORRECCIÓN: El HR ahora sube al marcador general y cuenta como Carrera Impulsada (RBI)
             if (type === 'HR') { 
                 p.stats.hr++; 
                 p.stats.rbi++; 
@@ -391,7 +390,6 @@
                 addLog('batting', p.name, type, color, timestamp);
             }
 
-            // CORRECCIÓN: 'OC' (Out en carrera) ha sido añadido para que NO cambie el turno al bate automáticamente
             if (type !== 'RBI' && type !== 'BR' && type !== 'OR' && type !== 'OC') rotatePlayer('batter');
             
             if (currentGameScore.batOuts >= 3) {
@@ -517,7 +515,7 @@
                 const whip = inningsVal > 0 ? (((s.hits_allowed||0) + (s.bb_allowed||0)) / inningsVal).toFixed(2) : "0.00";
 
                 return `
-                <div class="card p-5 border-l-4 ${p.name.toLowerCase().includes('beto') ? 'border-blue-500' : 'border-red-500'}">
+                <div class="card p-5 border-l-4 ${p.name.toLowerCase().includes('beto') ? 'border-blue-400' : 'border-red-400'}">
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <h3 class="text-xl font-black uppercase text-white">${p.name}</h3>
@@ -552,10 +550,10 @@
                             <p class="text-[9px] text-slate-500 font-bold">BB</p><p class="font-bold">${s.bb||0}</p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-red-500 font-bold">K-REC</p><p class="font-bold">${s.k_received||0}</p>
+                            <p class="text-[9px] text-red-400 font-bold">K-REC</p><p class="font-bold">${s.k_received||0}</p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">BR / OR</p><p class="font-bold text-teal-400 text-xs">${s.stolen_bases||0} / <span class="text-rose-400">${s.caught_stealing||0}</span></p>
+                            <p class="text-[9px] text-slate-500 font-bold">BR / OR</p><p class="font-bold text-cyan-400 text-xs">${s.stolen_bases||0} / <span class="text-rose-400">${s.caught_stealing||0}</span></p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
                             <p class="text-[9px] text-rose-300 font-bold">Out Carr.</p><p class="font-bold text-xs text-rose-300">${s.outs_on_base||0}</p>
@@ -585,7 +583,7 @@
                                 <p class="text-[9px] text-slate-500 uppercase">C. Sucias</p><p class="font-bold text-slate-400">${s.uer||0}</p>
                             </div>
                             <div class="text-center">
-                                <p class="text-[9px] text-slate-400 uppercase">Err Def / AR</p><p class="font-bold text-xs text-orange-400">${s.pitcher_errors||0} / <span class="text-purple-400">${s.caught_stealing_pitcher||0}</span></p>
+                                <p class="text-[9px] text-slate-400 uppercase">Err Def / AR</p><p class="font-bold text-xs text-amber-400">${s.pitcher_errors||0} / <span class="text-indigo-400">${s.caught_stealing_pitcher||0}</span></p>
                             </div>
                         </div>
                     </div>
@@ -681,15 +679,15 @@
             if (isGameActive) {
                 controls.classList.remove('opacity-30', 'pointer-events-none');
                 document.getElementById('game-btn-text').innerText = "FINALIZAR PARTIDO";
-                btn.classList.replace('bg-green-600', 'bg-red-600');
+                btn.classList.replace('bg-emerald-700', 'bg-rose-950/80');
                 indicator.innerText = "• PARTIDO EN VIVO •";
-                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-green-500/20 text-green-400 border border-green-500/50 w-fit";
+                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 w-fit";
             } else {
                 controls.classList.add('opacity-30', 'pointer-events-none');
                 document.getElementById('game-btn-text').innerText = "EMPEZAR PARTIDO";
-                btn.classList.replace('bg-red-600', 'bg-green-600');
+                btn.classList.replace('bg-rose-950/80', 'bg-emerald-700');
                 indicator.innerText = "ESPERANDO PARTIDO";
-                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/50 w-fit";
+                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-300 border border-red-500/30 w-fit";
             }
         }
 
