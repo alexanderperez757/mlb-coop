@@ -6,7 +6,7 @@
     <title>MLB THE SHOW 26 COOP - STATS PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; transition: background-color 0.3s; overflow-x: hidden; }
         .card { background-color: #1e293b; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); transition: all 0.2s; }
@@ -134,41 +134,49 @@
             <div id="game-controls" class="opacity-30 pointer-events-none transition-all duration-300 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="card p-6 border-t-4 border-blue-500">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">🏏 Lineup</h2>
+                        <h2 class="text-xl font-bold">🏏 Ofensiva - Lineup</h2>
                         <div id="batter-sprite-container" class="h-16 flex items-center"></div>
                     </div>
                     <select id="activeBatter" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-blue-500"></select>
+                    
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="recordBatting('H', '#16a34a')" class="p-3 bg-green-600/20 hover:bg-green-600/40 border border-green-600/50 rounded-lg font-bold text-green-400">1B</button>
-                        <button onclick="recordBatting('2B', '#059669')" class="p-3 bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-600/50 rounded-lg font-bold text-emerald-400">2B</button>
-                        <button onclick="recordBatting('3B', '#ea580c')" class="p-3 bg-orange-600/20 hover:bg-orange-600/40 border border-orange-600/50 rounded-lg font-bold text-orange-400">3B</button>
-                        <button onclick="recordBatting('HR', '#eab308')" class="p-3 bg-yellow-600/20 hover:bg-yellow-600/40 border border-yellow-600/50 rounded-lg font-bold text-yellow-400">HR</button>
-                        <button onclick="recordBatting('BB', '#2563eb')" class="p-3 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-600/50 rounded-lg font-bold text-blue-400">BB</button>
-                        <button onclick="recordBatting('RBI', '#9333ea')" class="p-3 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-600/50 rounded-lg font-bold text-purple-400">RBI</button>
-                        <button onclick="recordBatting('OUT', '#475569')" class="p-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-bold text-xs uppercase">Fly/Ground</button>
-                        <button onclick="recordBatting('K', '#dc2626')" class="p-3 bg-red-600/20 hover:bg-red-600/40 border border-red-600/50 rounded-lg font-bold text-red-400">K-Recibido</button>
-                        <button onclick="recordBatting('E', '#64748b')" class="p-3 bg-slate-600/20 hover:bg-slate-600/40 border border-slate-600/50 rounded-lg font-bold text-slate-300">ERR-B</button>
-                        <button onclick="recordBatting('BR', '#10b981')" class="p-3 bg-teal-600/20 hover:bg-teal-600/40 border border-teal-600/50 rounded-lg font-bold text-teal-400 text-xs">BASE ROBADA</button>
-                        <button onclick="recordBatting('OR', '#f43f5e')" class="p-3 bg-rose-600/20 hover:bg-rose-600/40 border border-rose-600/50 rounded-lg font-bold text-rose-400 text-xs">OUT ROBANDO</button>
-                        <button onclick="recordBatting('OC', '#fda4af')" class="p-3 bg-rose-400/20 hover:bg-rose-400/40 border border-rose-400/50 rounded-lg font-bold text-rose-300 text-xs">OUT EN CARRERA</button>
+                        <button onclick="recordBatting('H', '#22c55e')" class="p-3 bg-green-500 text-slate-950 rounded-lg font-black hover:bg-green-400 shadow-md">1B (Hit)</button>
+                        <button onclick="recordBatting('2B', '#10b981')" class="p-3 bg-emerald-500 text-slate-950 rounded-lg font-black hover:bg-emerald-400 shadow-md">2B</button>
+                        <button onclick="recordBatting('3B', '#f97316')" class="p-3 bg-orange-500 text-slate-950 rounded-lg font-black hover:bg-orange-400 shadow-md">3B</button>
+                        
+                        <button onclick="recordBatting('HR', '#eab308')" class="p-3 bg-yellow-400 text-slate-950 rounded-lg font-black hover:bg-yellow-300 shadow-lg border-2 border-yellow-500 animate-pulse">🔥 HR</button>
+                        <button onclick="recordBatting('BB', '#3b82f6')" class="p-3 bg-blue-500 text-white rounded-lg font-black hover:bg-blue-400 shadow-md">BB (Walk)</button>
+                        <button onclick="recordBatting('RBI', '#a855f7')" class="p-3 bg-purple-500 text-white rounded-lg font-black hover:bg-purple-400 shadow-md">🎯 RBI (+1 Carr)</button>
+                        
+                        <button onclick="recordBatting('OUT', '#64748b')" class="p-3 bg-slate-600 text-white rounded-lg font-bold hover:bg-slate-500 text-xs uppercase">Fly / Ground</button>
+                        <button onclick="recordBatting('K', '#ef4444')" class="p-3 bg-red-600 text-white rounded-lg font-black hover:bg-red-500 text-sm">K Recibido</button>
+                        <button onclick="recordBatting('E', '#475569')" class="p-3 bg-slate-700 text-slate-300 rounded-lg font-bold hover:bg-slate-600 text-xs">Error Bat</button>
+                        
+                        <button onclick="recordBatting('BR', '#06b6d4')" class="p-3 bg-cyan-500 text-slate-950 rounded-lg font-black hover:bg-cyan-400 text-xs shadow-md">🏃‍♂️ BASE ROBADA</button>
+                        <button onclick="recordBatting('OR', '#f43f5e')" class="p-3 bg-rose-500 text-white rounded-lg font-black hover:bg-rose-400 text-xs shadow-md">🛑 OUT ROBANDO</button>
+                        <button onclick="recordBatting('OC', '#e11d48')" class="p-3 bg-rose-700 text-white rounded-lg font-black hover:bg-rose-600 text-xs shadow-md border border-rose-400">⚠️ OUT EN CARRERA</button>
                     </div>
                 </div>
 
                 <div class="card p-6 border-t-4 border-red-500">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">⚾ Bullpen <span id="p-era-live" class="text-xs text-red-400 ml-2"></span></h2>
+                        <h2 class="text-xl font-bold">⚾ Defensiva - Bullpen</h2>
                         <div id="pitcher-sprite-container" class="h-16 flex items-center"></div>
                     </div>
                     <select id="activePitcher" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-red-500"></select>
+                    
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="recordPitching('K', '#dc2626')" class="p-3 bg-red-600/20 hover:bg-red-600/40 border border-red-600/50 rounded-xl font-bold text-red-400">PONCHE (K)</button>
-                        <button onclick="recordPitching('OUT', '#475569')" class="p-3 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-xl font-bold">OUT (Contacto)</button>
-                        <button onclick="recordPitching('HIT', '#ea580c')" class="p-3 bg-orange-600/20 hover:bg-orange-600/40 border border-orange-600/50 rounded-xl font-bold text-orange-400">HIT RECIBIDO</button>
-                        <button onclick="recordPitching('BB', '#2563eb')" class="p-3 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-600/50 rounded-xl font-bold text-blue-400">BB-P (Caminado)</button>
-                        <button onclick="recordPitching('ER', '#fca5a5')" class="p-3 bg-red-900/40 hover:bg-red-900/60 border border-red-900/50 rounded-xl font-bold text-red-200">CARRERA LIMPIA</button>
-                        <button onclick="recordPitching('UER', '#94a3b8')" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl font-bold text-slate-400">CARRERA SUCIA</button>
-                        <button onclick="recordPitching('AR', '#a855f7')" class="p-3 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-600/50 rounded-xl font-bold text-purple-400 text-xs">ATRAPADO ROBANDO</button>
-                        <button onclick="recordPitching('E_D', '#f97316')" class="p-3 bg-orange-500/20 hover:bg-orange-500/40 border border-orange-500/50 rounded-xl font-bold text-orange-400 text-xs">ERROR DEFENSIVO</button>
+                        <button onclick="recordPitching('K', '#b91c1c')" class="p-3 bg-red-700 text-white rounded-xl font-black hover:bg-red-600 shadow-md">🔥 PONCHE (K)</button>
+                        <button onclick="recordPitching('OUT', '#475569')" class="p-3 bg-slate-700 text-slate-200 rounded-xl font-black hover:bg-slate-600 shadow-md">OUT (Contacto)</button>
+                        
+                        <button onclick="recordPitching('HIT', '#ea580c')" class="p-3 bg-orange-600/30 text-orange-400 border-2 border-orange-500 rounded-xl font-black hover:bg-orange-600/50">HIT Recibido</button>
+                        <button onclick="recordPitching('BB', '#2563eb/30')" class="p-3 bg-blue-600/30 text-blue-400 border-2 border-blue-500 rounded-xl font-black hover:bg-blue-600/50">BB (Caminado)</button>
+                        
+                        <button onclick="recordPitching('ER', '#dc2626')" class="p-3 bg-red-600/20 text-red-300 border border-red-600 rounded-xl font-bold hover:bg-red-600/30">Carrera Limpia</button>
+                        <button onclick="recordPitching('UER', '#94a3b8')" class="p-3 bg-slate-800 text-slate-400 border border-slate-600 rounded-xl font-bold hover:bg-slate-700">Carrera Sucia</button>
+                        
+                        <button onclick="recordPitching('AR', '#8b5cf6')" class="p-3 bg-violet-600 text-white rounded-xl font-black hover:bg-violet-500 text-xs shadow-md">⚡ ATRAPADO ROBANDO</button>
+                        <button onclick="recordPitching('E_D', '#f97316')" class="p-3 bg-orange-500 text-slate-950 rounded-xl font-black hover:bg-orange-400 text-xs shadow-md">❌ ERROR DEFENSIVO</button>
                     </div>
                 </div>
             </div>
@@ -314,7 +322,6 @@
             save();
         }
 
-        // Retorna el índice del jugador previo (el que antecede al turno actual)
         function getAntecessorIndex(currentId) {
             if (players.length < 2) return -1;
             let currentIndex = players.findIndex(p => p.id == currentId);
@@ -340,14 +347,22 @@
             if (type === '1B' || type === 'H') shiftBases(1);
             if (type === '2B') { p.stats.h2b = (p.stats.h2b || 0) + 1; shiftBases(2); }
             if (type === '3B') { p.stats.h3b = (p.stats.h3b || 0) + 1; shiftBases(3); }
-            if (type === 'HR') { p.stats.hr++; p.stats.rbi++; showHR(); clearBases(); }
+            
+            // CORRECCIÓN: El HR ahora sube al marcador general y cuenta como Carrera Impulsada (RBI)
+            if (type === 'HR') { 
+                p.stats.hr++; 
+                p.stats.rbi++; 
+                currentGameScore.runs++; 
+                showHR(); 
+                clearBases(); 
+            }
+            
             if (type === 'BB') { p.stats.bb = (p.stats.bb || 0) + 1; shiftBases(1); }
             if (type === 'K') p.stats.k_received = (p.stats.k_received || 0) + 1;
             if (type === 'RBI') { p.stats.rbi++; currentGameScore.runs++; }
             
             if (type === 'OUT' || type === 'K' || type === 'OC') currentGameScore.batOuts++;
             
-            // Lógicas Especiales de Robo y Carrera
             if (type === 'BR') {
                 let prevIdx = getAntecessorIndex(pid);
                 if (prevIdx !== -1) {
@@ -376,7 +391,7 @@
                 addLog('batting', p.name, type, color, timestamp);
             }
 
-            // Rotación automática: No cambia en RBI, BR, OR ni en OC
+            // CORRECCIÓN: 'OC' (Out en carrera) ha sido añadido para que NO cambie el turno al bate automáticamente
             if (type !== 'RBI' && type !== 'BR' && type !== 'OR' && type !== 'OC') rotatePlayer('batter');
             
             if (currentGameScore.batOuts >= 3) {
@@ -408,7 +423,6 @@
                 p.stats.outs = (p.stats.outs || 0) + 1;
                 addLog('pitching', p.name, 'AR', color, Date.now());
             } else if (type === 'E_D') {
-                // El error defensivo se computa al usuario que NO está pichando actualmente
                 let prevIdx = getAntecessorIndex(pid);
                 if (prevIdx !== -1) {
                     if(!players[prevIdx].stats.pitcher_errors) players[prevIdx].stats.pitcher_errors = 0;
@@ -431,7 +445,6 @@
             save();
         }
 
-        // Desplazamiento visual de corredores (Las carreras automáticas han sido removidas de aquí por tu solicitud)
         function shiftBases(numBases) {
             let currentBases = [currentGameScore.bases[1], currentGameScore.bases[2], currentGameScore.bases[3]];
             if (numBases === 1) {
@@ -467,7 +480,7 @@
                     if (['H','2B','3B','HR'].includes(log.type)) p.stats.hits--;
                     if (log.type === '2B') p.stats.h2b--;
                     if (log.type === '3B') p.stats.h3b--;
-                    if (log.type === 'HR') { p.stats.hr--; p.stats.rbi--; }
+                    if (log.type === 'HR') { p.stats.hr--; p.stats.rbi--; currentGameScore.runs = Math.max(0, currentGameScore.runs - 1); }
                     if (log.type === 'BB') p.stats.bb--;
                     if (log.type === 'K') p.stats.k_received--;
                     if (log.type === 'RBI') { p.stats.rbi--; currentGameScore.runs = Math.max(0, currentGameScore.runs - 1); }
