@@ -6,7 +6,7 @@
     <title>MLB THE SHOW 26 COOP - STATS PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; transition: background-color 0.3s; overflow-x: hidden; }
         .card { background-color: #1e293b; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); transition: all 0.2s; }
@@ -150,6 +150,7 @@
                         <button onclick="recordBatting('E', '#64748b')" class="p-3 bg-slate-600/20 hover:bg-slate-600/40 border border-slate-600/50 rounded-lg font-bold text-slate-300">ERR-B</button>
                         <button onclick="recordBatting('BR', '#10b981')" class="p-3 bg-teal-600/20 hover:bg-teal-600/40 border border-teal-600/50 rounded-lg font-bold text-teal-400 text-xs">BASE ROBADA</button>
                         <button onclick="recordBatting('OR', '#f43f5e')" class="p-3 bg-rose-600/20 hover:bg-rose-600/40 border border-rose-600/50 rounded-lg font-bold text-rose-400 text-xs">OUT ROBANDO</button>
+                        <button onclick="recordBatting('OC', '#fda4af')" class="p-3 bg-rose-400/20 hover:bg-rose-400/40 border border-rose-400/50 rounded-lg font-bold text-rose-300 text-xs">OUT EN CARRERA</button>
                     </div>
                 </div>
 
@@ -167,7 +168,7 @@
                         <button onclick="recordPitching('ER', '#fca5a5')" class="p-3 bg-red-900/40 hover:bg-red-900/60 border border-red-900/50 rounded-xl font-bold text-red-200">CARRERA LIMPIA</button>
                         <button onclick="recordPitching('UER', '#94a3b8')" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl font-bold text-slate-400">CARRERA SUCIA</button>
                         <button onclick="recordPitching('AR', '#a855f7')" class="p-3 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-600/50 rounded-xl font-bold text-purple-400 text-xs">ATRAPADO ROBANDO</button>
-                        <button onclick="recordPitching('E_P', '#f97316')" class="p-3 bg-orange-500/20 hover:bg-orange-500/40 border border-orange-500/50 rounded-xl font-bold text-orange-400 text-xs">ERROR DE PICHEO</button>
+                        <button onclick="recordPitching('E_D', '#f97316')" class="p-3 bg-orange-500/20 hover:bg-orange-500/40 border border-orange-500/50 rounded-xl font-bold text-orange-400 text-xs">ERROR DEFENSIVO</button>
                     </div>
                 </div>
             </div>
@@ -238,7 +239,6 @@
 
         let players = [];
         let isGameActive = false;
-        // Se añade estructura para bases y separación estricta de outs ofensivos y defensivos
         let currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1, bases: { 1: false, 2: false, 3: false } };
         let historyLogs = { batting: [], pitching: [] };
         let activeSelection = { batterId: "", pitcherId: "" };
@@ -273,27 +273,23 @@
         function updateUI() {
             document.getElementById('score-runs').innerText = currentGameScore.runs;
             document.getElementById('score-allowed').innerText = currentGameScore.allowed;
-            document.getElementById('display-inning').innerText = currentGameScore.inning;
+            document.getElementById('display-inning').innerText = Math.floor(currentGameScore.inning);
             
-            // Lógica e indicador visual de Parte Alta y Parte Baja
             const esAlta = currentGameScore.inning % 1 === 0; 
             document.getElementById('display-part').innerText = esAlta ? "ALTA" : "BAJA";
 
-            // Renderizar los puntos de Outs de Bateo (Ofensiva)
             document.getElementById('text-outs-bat').innerText = currentGameScore.batOuts;
             const bDots = document.getElementById('bat-outs').children;
             for(let i=0; i<3; i++) {
                 bDots[i].style.backgroundColor = i < currentGameScore.batOuts ? '#3b82f6' : '#334155';
             }
 
-            // Renderizar los puntos de Outs de Picheo (Bullpen)
             document.getElementById('text-outs-pitch').innerText = currentGameScore.pitchOuts;
             const pDots = document.getElementById('pitch-outs').children;
             for(let i=0; i<3; i++) {
                 pDots[i].style.backgroundColor = i < currentGameScore.pitchOuts ? '#dc2626' : '#334155';
             }
 
-            // Actualizar interfaz visual del mapa de bases
             for(let b=1; b<=3; b++) {
                 const element = document.getElementById(`base-${b}`);
                 if(currentGameScore.bases[b]) {
@@ -312,11 +308,19 @@
             renderFullHistory();
         }
 
-        // Permite prender o apagar corredores en las bases haciendo click directo en el mapa
         function manualToggleBase(baseNum) {
             if(!isGameActive) return;
             currentGameScore.bases[baseNum] = !currentGameScore.bases[baseNum];
             save();
+        }
+
+        // Retorna el índice del jugador previo (el que antecede al turno actual)
+        function getAntecessorIndex(currentId) {
+            if (players.length < 2) return -1;
+            let currentIndex = players.findIndex(p => p.id == currentId);
+            let prevIndex = currentIndex - 1;
+            if (prevIndex < 0) prevIndex = players.length - 1;
+            return prevIndex;
         }
 
         function recordBatting(type, color) {
@@ -326,46 +330,54 @@
             
             const timestamp = Date.now();
             
-            // Inicialización de nuevas estadísticas si no existen
             if(!p.stats.stolen_bases) p.stats.stolen_bases = 0;
             if(!p.stats.caught_stealing) p.stats.caught_stealing = 0;
+            if(!p.stats.outs_on_base) p.stats.outs_on_base = 0;
 
-            if (['H','2B','3B','HR','OUT','K'].includes(type)) p.stats.atBats++;
+            if (['H','2B','3B','HR','OUT','K','OC'].includes(type)) p.stats.atBats++;
             if (['H','2B','3B','HR'].includes(type)) p.stats.hits++;
             
-            if (type === '1B' || type === 'H') {
-                shiftBases(1);
-            }
-            if (type === '2B') {
-                p.stats.h2b = (p.stats.h2b || 0) + 1;
-                shiftBases(2);
-            }
-            if (type === '3B') {
-                p.stats.h3b = (p.stats.h3b || 0) + 1;
-                shiftBases(3);
-            }
-            if (type === 'HR') { 
-                p.stats.hr++; p.stats.rbi++; currentGameScore.runs++; showHR();
-                clearBases();
-            }
-            if (type === 'BB') {
-                p.stats.bb = (p.stats.bb || 0) + 1;
-                shiftBases(1);
-            }
+            if (type === '1B' || type === 'H') shiftBases(1);
+            if (type === '2B') { p.stats.h2b = (p.stats.h2b || 0) + 1; shiftBases(2); }
+            if (type === '3B') { p.stats.h3b = (p.stats.h3b || 0) + 1; shiftBases(3); }
+            if (type === 'HR') { p.stats.hr++; p.stats.rbi++; showHR(); clearBases(); }
+            if (type === 'BB') { p.stats.bb = (p.stats.bb || 0) + 1; shiftBases(1); }
             if (type === 'K') p.stats.k_received = (p.stats.k_received || 0) + 1;
             if (type === 'RBI') { p.stats.rbi++; currentGameScore.runs++; }
             
-            if (type === 'OUT' || type === 'K') currentGameScore.batOuts++;
+            if (type === 'OUT' || type === 'K' || type === 'OC') currentGameScore.batOuts++;
             
-            // Nuevas lógicas de robos ofensivos
-            if (type === 'BR') p.stats.stolen_bases++;
-            if (type === 'OR') {
-                p.stats.caught_stealing++;
+            // Lógicas Especiales de Robo y Carrera
+            if (type === 'BR') {
+                let prevIdx = getAntecessorIndex(pid);
+                if (prevIdx !== -1) {
+                    if(!players[prevIdx].stats.stolen_bases) players[prevIdx].stats.stolen_bases = 0;
+                    players[prevIdx].stats.stolen_bases++;
+                    addLog('batting', players[prevIdx].name, 'BR', color, timestamp);
+                } else {
+                    p.stats.stolen_bases++;
+                    addLog('batting', p.name, 'BR', color, timestamp);
+                }
+            } else if (type === 'OR') {
                 currentGameScore.batOuts++;
+                let prevIdx = getAntecessorIndex(pid);
+                if (prevIdx !== -1) {
+                    if(!players[prevIdx].stats.caught_stealing) players[prevIdx].stats.caught_stealing = 0;
+                    players[prevIdx].stats.caught_stealing++;
+                    addLog('batting', players[prevIdx].name, 'OR', color, timestamp);
+                } else {
+                    p.stats.caught_stealing++;
+                    addLog('batting', p.name, 'OR', color, timestamp);
+                }
+            } else if (type === 'OC') {
+                p.stats.outs_on_base++;
+                addLog('batting', p.name, 'OUT EN CARRERA', color, timestamp);
+            } else {
+                addLog('batting', p.name, type, color, timestamp);
             }
 
-            addLog('batting', p.name, type, color, timestamp);
-            if (type !== 'RBI' && type !== 'BR' && type !== 'OR') rotatePlayer('batter');
+            // Rotación automática: No cambia en RBI, BR, OR ni en OC
+            if (type !== 'RBI' && type !== 'BR' && type !== 'OR' && type !== 'OC') rotatePlayer('batter');
             
             if (currentGameScore.batOuts >= 3) {
                 showToast("🛑 3 OUTS DE BATEO - CAMBIO");
@@ -380,62 +392,57 @@
             if(!pid) return showToast("⚠️ Selecciona un pitcher");
             const p = players.find(x => x.id == pid);
 
-            // Inicialización de nuevas métricas defensivas si no existen
             if(!p.stats.pitcher_errors) p.stats.pitcher_errors = 0;
             if(!p.stats.caught_stealing_pitcher) p.stats.caught_stealing_pitcher = 0;
 
-            if (type === 'K') { 
-                p.stats.pk++;
-                currentGameScore.pitchOuts++; p.stats.outs = (p.stats.outs || 0) + 1; 
-            }
-            if (type === 'OUT') { 
-                currentGameScore.pitchOuts++;
-                p.stats.outs = (p.stats.outs || 0) + 1; 
-            }
+            if (type === 'K') { p.stats.pk++; currentGameScore.pitchOuts++; p.stats.outs = (p.stats.outs || 0) + 1; }
+            if (type === 'OUT') { currentGameScore.pitchOuts++; p.stats.outs = (p.stats.outs || 0) + 1; }
             if (type === 'HIT') p.stats.hits_allowed = (p.stats.hits_allowed || 0) + 1;
             if (type === 'BB') p.stats.bb_allowed = (p.stats.bb_allowed || 0) + 1;
             if (type === 'ER') { p.stats.pruns++; currentGameScore.allowed++; }
             if (type === 'UER') { p.stats.uer = (p.stats.uer || 0) + 1; currentGameScore.allowed++; }
             
-            // Nuevas lógicas de picheo
             if (type === 'AR') {
                 p.stats.caught_stealing_pitcher++;
                 currentGameScore.pitchOuts++;
                 p.stats.outs = (p.stats.outs || 0) + 1;
+                addLog('pitching', p.name, 'AR', color, Date.now());
+            } else if (type === 'E_D') {
+                // El error defensivo se computa al usuario que NO está pichando actualmente
+                let prevIdx = getAntecessorIndex(pid);
+                if (prevIdx !== -1) {
+                    if(!players[prevIdx].stats.pitcher_errors) players[prevIdx].stats.pitcher_errors = 0;
+                    players[prevIdx].stats.pitcher_errors++;
+                    addLog('pitching', players[prevIdx].name, 'ERR-DEF', color, Date.now());
+                } else {
+                    p.stats.pitcher_errors++;
+                    addLog('pitching', p.name, 'ERR-DEF', color, Date.now());
+                }
+            } else {
+                addLog('pitching', p.name, type, color, Date.now());
             }
-            if (type === 'E_P') {
-                p.stats.pitcher_errors++;
-            }
-
-            addLog('pitching', p.name, type, color, Date.now());
             
             if (currentGameScore.pitchOuts >= 3) {
                 showToast("✅ INNING DE PICHEO TERMINADO");
                 currentGameScore.pitchOuts = 0;
-                currentGameScore.inning = currentGameScore.inning + 0.5; // Avanza a la siguiente mitad (Alta/Baja)
+                currentGameScore.inning = currentGameScore.inning + 0.5; 
                 rotatePlayer('pitcher');
             }
             save();
         }
 
-        // Lógica de avance automático de corredores en base por hit o boleto
+        // Desplazamiento visual de corredores (Las carreras automáticas han sido removidas de aquí por tu solicitud)
         function shiftBases(numBases) {
             let currentBases = [currentGameScore.bases[1], currentGameScore.bases[2], currentGameScore.bases[3]];
             if (numBases === 1) {
-                if (currentBases[0] && currentBases[1] && currentBases[2]) currentGameScore.runs++;
                 if (currentBases[0] && currentBases[1]) currentGameScore.bases[3] = true;
                 if (currentBases[0]) currentGameScore.bases[2] = true;
                 currentGameScore.bases[1] = true;
             } else if (numBases === 2) {
-                if (currentBases[2]) currentGameScore.runs++;
-                if (currentBases[1]) currentGameScore.runs++;
                 if (currentBases[0]) currentGameScore.bases[3] = true;
                 currentGameScore.bases[2] = true;
                 currentGameScore.bases[1] = false;
             } else if (numBases === 3) {
-                if (currentBases[2]) currentGameScore.runs++;
-                if (currentBases[1]) currentGameScore.runs++;
-                if (currentBases[0]) currentGameScore.runs++;
                 currentGameScore.bases[3] = true;
                 currentGameScore.bases[2] = false;
                 currentGameScore.bases[1] = false;
@@ -456,26 +463,27 @@
 
             if(p) {
                 if(side === 'batting') {
-                    if (['H','2B','3B','HR','OUT','K'].includes(log.type)) p.stats.atBats--;
+                    if (['H','2B','3B','HR','OUT','K','OC'].includes(log.type)) p.stats.atBats--;
                     if (['H','2B','3B','HR'].includes(log.type)) p.stats.hits--;
                     if (log.type === '2B') p.stats.h2b--;
                     if (log.type === '3B') p.stats.h3b--;
-                    if (log.type === 'HR') { p.stats.hr--; p.stats.rbi--; currentGameScore.runs--; }
+                    if (log.type === 'HR') { p.stats.hr--; p.stats.rbi--; }
                     if (log.type === 'BB') p.stats.bb--;
                     if (log.type === 'K') p.stats.k_received--;
-                    if (log.type === 'RBI') { p.stats.rbi--; currentGameScore.runs--; }
-                    if (log.type === 'OUT' || log.type === 'K') currentGameScore.batOuts = Math.max(0, currentGameScore.batOuts - 1);
+                    if (log.type === 'RBI') { p.stats.rbi--; currentGameScore.runs = Math.max(0, currentGameScore.runs - 1); }
+                    if (log.type === 'OUT' || log.type === 'K' || log.type === 'OC') currentGameScore.batOuts = Math.max(0, currentGameScore.batOuts - 1);
                     if (log.type === 'BR') p.stats.stolen_bases = Math.max(0, p.stats.stolen_bases - 1);
                     if (log.type === 'OR') { p.stats.caught_stealing = Math.max(0, p.stats.caught_stealing - 1); currentGameScore.batOuts = Math.max(0, currentGameScore.batOuts - 1); }
+                    if (log.type === 'OUT EN CARRERA') p.stats.outs_on_base = Math.max(0, p.stats.outs_on_base - 1);
                 } else {
                     if (log.type === 'K') { p.stats.pk--; currentGameScore.pitchOuts = Math.max(0, currentGameScore.pitchOuts - 1); p.stats.outs--; }
                     if (log.type === 'OUT') { currentGameScore.pitchOuts = Math.max(0, currentGameScore.pitchOuts - 1); p.stats.outs--; }
                     if (log.type === 'HIT') p.stats.hits_allowed--;
                     if (log.type === 'BB') p.stats.bb_allowed--;
-                    if (log.type === 'ER') { p.stats.pruns--; currentGameScore.allowed--; }
-                    if (log.type === 'UER') { p.stats.uer--; currentGameScore.allowed--; }
+                    if (log.type === 'ER') { p.stats.pruns--; currentGameScore.allowed = Math.max(0, currentGameScore.allowed - 1); }
+                    if (log.type === 'UER') { p.stats.uer--; currentGameScore.allowed = Math.max(0, currentGameScore.allowed - 1); }
                     if (log.type === 'AR') { p.stats.caught_stealing_pitcher = Math.max(0, p.stats.caught_stealing_pitcher - 1); currentGameScore.pitchOuts = Math.max(0, currentGameScore.pitchOuts - 1); p.stats.outs--; }
-                    if (log.type === 'E_P') p.stats.pitcher_errors = Math.max(0, p.stats.pitcher_errors - 1);
+                    if (log.type === 'ERR-DEF') p.stats.pitcher_errors = Math.max(0, p.stats.pitcher_errors - 1);
                 }
             }
             historyLogs[side].splice(logIndex, 1);
@@ -537,6 +545,9 @@
                             <p class="text-[9px] text-slate-500 font-bold">BR / OR</p><p class="font-bold text-teal-400 text-xs">${s.stolen_bases||0} / <span class="text-rose-400">${s.caught_stealing||0}</span></p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
+                            <p class="text-[9px] text-rose-300 font-bold">Out Carr.</p><p class="font-bold text-xs text-rose-300">${s.outs_on_base||0}</p>
+                        </div>
+                        <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800 col-span-4">
                             <p class="text-[9px] text-slate-500 font-bold">AB / H</p><p class="font-bold text-xs">${s.atBats} / ${s.hits}</p>
                         </div>
                     </div>
@@ -561,7 +572,7 @@
                                 <p class="text-[9px] text-slate-500 uppercase">C. Sucias</p><p class="font-bold text-slate-400">${s.uer||0}</p>
                             </div>
                             <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase">Err / AR</p><p class="font-bold text-xs text-orange-400">${s.pitcher_errors||0} / <span class="text-purple-400">${s.caught_stealing_pitcher||0}</span></p>
+                                <p class="text-[9px] text-slate-400 uppercase">Err Def / AR</p><p class="font-bold text-xs text-orange-400">${s.pitcher_errors||0} / <span class="text-purple-400">${s.caught_stealing_pitcher||0}</span></p>
                             </div>
                         </div>
                     </div>
@@ -614,7 +625,7 @@
             const input = document.getElementById('playerNameInput');
             const name = input.value.trim();
             if (name) {
-                players.push({ id: Date.now(), name, stats: { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0, h2b:0, h3b:0, bb:0, k_received:0, uer:0, outs:0, hits_allowed:0, bb_allowed:0, stolen_bases: 0, caught_stealing: 0, pitcher_errors: 0, caught_stealing_pitcher: 0 } });
+                players.push({ id: Date.now(), name, stats: { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0, h2b:0, h3b:0, bb:0, k_received:0, uer:0, outs:0, hits_allowed:0, bb_allowed:0, stolen_bases: 0, caught_stealing: 0, pitcher_errors: 0, caught_stealing_pitcher: 0, outs_on_base: 0 } });
                 input.value = ''; save();
             }
         }
