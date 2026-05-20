@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MLB THE SHOW 26 COOP - STATS PRO</title>
+    <title>MLB THE SHOW 26 COOP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
@@ -14,32 +14,26 @@
         .scoreboard-font { font-family: 'Courier New', Courier, monospace; }
         
         #hr-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.9);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            animation: fadeIn 0.4s ease-out;
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            z-index: 100; align-items: center; justify-content: center;
+            flex-direction: column; animation: fadeIn 0.4s ease-out;
         }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
         .hr-text {
-            font-size: 5rem;
-            font-weight: 900;
-            color: #fbbf24;
+            font-size: 5rem; font-weight: 900; color: #fbbf24;
             text-shadow: 0 0 20px #fbbf24, 0 0 40px #d97706;
             animation: hr-bounce 0.5s infinite alternate;
         }
         @keyframes hr-bounce { from { transform: scale(1); } to { transform: scale(1.05); } }
 
         .out-dot { width: 14px; height: 14px; border-radius: 9999px; transition: all 0.3s; border: 2px solid rgba(255,255,255,0.1); }
-        .character-sprite { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
+        
+        /* Estilos del Rombo de las Bases */
+        .base-diamond { width: 18px; height: 18px; background-color: #334155; transform: rotate(45deg); transition: all 0.3s; border: 1px solid rgba(255,255,255,0.2); }
+        .base-active { background-color: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
         
         ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
     </style>
 </head>
@@ -48,7 +42,6 @@
     <div id="hr-overlay">
         <div class="hr-text italic">HOME RUN!</div>
         <div class="mt-4 text-white text-2xl font-bold uppercase tracking-widest">¡HASTA LA LUNA! ⚾✨</div>
-        <img src="https://media.giphy.com/media/l0HlOn6UvV8xL5a6k/giphy.gif" class="mt-6 rounded-lg shadow-2xl border-4 border-yellow-500 w-64 md:w-80" alt="Home Run">
     </div>
 
     <div class="max-w-6xl mx-auto">
@@ -64,110 +57,124 @@
             </div>
         </header>
 
-        <div id="live-scoreboard" class="card p-5 mb-6 border-b-4 border-blue-600 flex flex-col md:flex-row justify-between items-center bg-slate-900 gap-6">
-            <div class="flex flex-col gap-3 w-full md:w-auto">
-                <div id="game-status-indicator" class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/50 w-fit">
-                    ESPERANDO PARTIDO
-                </div>
-                <div class="flex gap-8">
-                    <div>
-                        <p class="text-[10px] text-blue-400 font-black uppercase mb-2 tracking-tighter">Outs Inning <span id="display-inning" class="text-white ml-2">1</span></p>
-                        <div id="bat-outs" class="flex gap-2">
-                            <div class="out-dot bg-slate-700"></div>
-                            <div class="out-dot bg-slate-700"></div>
-                            <div class="out-dot bg-slate-700"></div>
+        <div id="live-scoreboard" class="card p-5 mb-6 border-b-4 border-blue-600 bg-slate-900">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex flex-col gap-3 w-full md:w-auto">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div id="game-status-indicator" class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/50">
+                            ESPERANDO PARTIDO
+                        </div>
+                        <div id="inning-display" class="bg-blue-600 px-3 py-1 rounded-md text-xs font-black text-white flex items-center gap-1">
+                            <span>ALTA 1</span> <span class="text-[10px]">▲</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-6 bg-slate-800/80 px-4 py-2 rounded-xl border border-slate-700 ml-2">
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Bases:</span>
+                            <div class="relative w-14 h-14 flex items-center justify-center">
+                                <div id="base-2" class="base-diamond absolute top-0" title="Segunda Base"></div>
+                                <div id="base-3" class="base-diamond absolute left-0" title="Tercera Base"></div>
+                                <div id="base-1" class="base-diamond absolute right-0" title="Primera Base"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-8 mt-1">
+                        <div>
+                            <p class="text-[10px] text-blue-400 font-black uppercase mb-2">Outs Bateando</p>
+                            <div id="bat-outs" class="flex gap-2">
+                                <div class="out-dot bg-slate-700"></div><div class="out-dot bg-slate-700"></div><div class="out-dot bg-slate-700"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-red-500 font-black uppercase mb-2">Outs Pitcheando</p>
+                            <div id="pitch-outs" class="flex gap-2">
+                                <div class="out-dot bg-slate-700"></div><div class="out-dot bg-slate-700"></div><div class="out-dot bg-slate-700"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="flex gap-8 md:gap-12 items-center bg-slate-800/50 px-8 py-4 rounded-2xl border border-slate-700">
-                <div class="text-center">
-                    <p class="text-[10px] text-blue-400 font-black uppercase mb-1">Anotadas</p>
-                    <span id="score-runs" class="scoreboard-font text-5xl text-white">0</span>
-                </div>
-                <div class="text-slate-600 text-3xl font-black">VS</div>
-                <div class="text-center">
-                    <p class="text-[10px] text-red-500 font-black uppercase mb-1">Permitidas</p>
-                    <span id="score-allowed" class="scoreboard-font text-5xl text-white">0</span>
+                
+                <div class="flex gap-8 md:gap-12 items-center bg-slate-800/50 px-8 py-4 rounded-2xl border border-slate-700">
+                    <div class="text-center">
+                        <p class="text-[10px] text-blue-400 font-black uppercase mb-1">Anotadas</p>
+                        <span id="score-runs" class="scoreboard-font text-5xl text-white">0</span>
+                    </div>
+                    <div class="text-slate-600 text-3xl font-black">VS</div>
+                    <div class="text-center">
+                        <p class="text-[10px] text-red-500 font-black uppercase mb-1">Permitidas</p>
+                        <span id="score-allowed" class="scoreboard-font text-5xl text-white">0</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <section id="section-game" class="space-y-6">
             <div class="flex flex-col sm:flex-row justify-center gap-4 mb-4">
-                <button id="btn-toggle-game" onclick="toggleGame()" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-full font-black text-lg shadow-lg transform transition-all active:scale-95 flex items-center gap-3">
+                <button id="btn-toggle-game" onclick="toggleGame()" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-full font-black text-lg shadow-lg flex items-center gap-3">
                     <span id="game-btn-icon">🏏</span> <span id="game-btn-text">EMPEZAR PARTIDO</span>
                 </button>
             </div>
 
-            <div id="game-controls" class="opacity-30 pointer-events-none transition-all duration-300 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="game-controls" class="opacity-30 pointer-events-none grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="card p-6 border-t-4 border-blue-500">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">🏏 Lineup</h2>
-                        <div id="batter-sprite-container" class="h-16 flex items-center"></div>
+                        <h2 class="text-xl font-bold">🏏 Lineup de Bateo</h2>
                     </div>
-                    <select id="activeBatter" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-blue-500"></select>
+                    <select id="activeBatter" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl"></select>
+                    
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="recordBatting('H', '#16a34a')" class="p-3 bg-green-600/20 hover:bg-green-600/40 border border-green-600/50 rounded-lg font-bold text-green-400">1B</button>
-                        <button onclick="recordBatting('2B', '#059669')" class="p-3 bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-600/50 rounded-lg font-bold text-emerald-400">2B</button>
-                        <button onclick="recordBatting('3B', '#ea580c')" class="p-3 bg-orange-600/20 hover:bg-orange-600/40 border border-orange-600/50 rounded-lg font-bold text-orange-400">3B</button>
-                        <button onclick="recordBatting('HR', '#eab308')" class="p-3 bg-yellow-600/20 hover:bg-yellow-600/40 border border-yellow-600/50 rounded-lg font-bold text-yellow-400">HR</button>
-                        <button onclick="recordBatting('BB', '#2563eb')" class="p-3 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-600/50 rounded-lg font-bold text-blue-400">BB</button>
-                        <button onclick="recordBatting('RBI', '#9333ea')" class="p-3 bg-purple-600/20 hover:bg-purple-600/40 border border-purple-600/50 rounded-lg font-bold text-purple-400">RBI</button>
-                        <button onclick="recordBatting('OUT', '#475569')" class="p-3 bg-slate-700 hover:bg-slate-600 rounded-lg font-bold text-xs uppercase">Fly/Ground</button>
-                        <button onclick="recordBatting('K', '#dc2626')" class="p-3 bg-red-600/20 hover:bg-red-600/40 border border-red-600/50 rounded-lg font-bold text-red-400">K-Recibido</button>
-                        <button onclick="recordBatting('E', '#64748b')" class="p-3 bg-slate-600/20 hover:bg-slate-600/40 border border-slate-600/50 rounded-lg font-bold text-slate-300">ERR-B</button>
+                        <button onclick="recordBatting('H')" class="p-3 bg-green-600/20 border border-green-600/50 rounded-lg font-bold text-green-400">1B</button>
+                        <button onclick="recordBatting('2B')" class="p-3 bg-emerald-600/20 border border-emerald-600/50 rounded-lg font-bold text-emerald-400">2B</button>
+                        <button onclick="recordBatting('3B')" class="p-3 bg-orange-600/20 border border-orange-600/50 rounded-lg font-bold text-orange-400">3B</button>
+                        <button onclick="recordBatting('HR')" class="p-3 bg-yellow-600/20 border border-yellow-600/50 rounded-lg font-bold text-yellow-400">HR</button>
+                        <button onclick="recordBatting('BB')" class="p-3 bg-blue-600/20 border border-blue-600/50 rounded-lg font-bold text-blue-400">BB</button>
+                        <button onclick="recordBatting('RBI')" class="p-3 bg-purple-600/20 border border-purple-600/50 rounded-lg font-bold text-purple-400">RBI</button>
+                        <button onclick="recordBatting('OUT')" class="p-3 bg-slate-700 rounded-lg font-bold">OUT</button>
+                        <button onclick="recordBatting('K')" class="p-3 bg-red-600/20 border border-red-600/50 rounded-lg font-bold text-red-400">K</button>
+                        
+                        <button onclick="recordBatting('BR')" class="p-3 bg-cyan-600/20 border border-cyan-500/50 rounded-lg font-bold text-cyan-400" title="Robo de Base Exitoso">ROBO (BR)</button>
+                        <button onclick="recordBatting('OR')" class="p-3 bg-rose-900/40 border border-rose-600/50 rounded-lg font-bold text-rose-400 col-span-3" title="Out Intentando Robar">OUT ROBANDO (OR)</button>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-slate-900/60 rounded-xl border border-slate-700/60">
+                        <p class="text-[10px] font-black text-slate-400 uppercase mb-2 text-center">Ajuste Manual de Almohadillas</p>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="toggleManualBase(1)" class="py-1 px-2 text-xs bg-slate-800 rounded font-medium border border-slate-700 text-slate-300">Alternar 1B</button>
+                            <button onclick="toggleManualBase(2)" class="py-1 px-2 text-xs bg-slate-800 rounded font-medium border border-slate-700 text-slate-300">Alternar 2B</button>
+                            <button onclick="toggleManualBase(3)" class="py-1 px-2 text-xs bg-slate-800 rounded font-medium border border-slate-700 text-slate-300">Alternar 3B</button>
+                        </div>
                     </div>
                 </div>
 
                 <div class="card p-6 border-t-4 border-red-500">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold">⚾ Bullpen <span id="p-era-live" class="text-xs text-red-400 ml-2"></span></h2>
-                        <div id="pitcher-sprite-container" class="h-16 flex items-center"></div>
+                        <h2 class="text-xl font-bold">⚾ Bullpen (Defensa)</h2>
                     </div>
-                    <select id="activePitcher" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-red-500"></select>
+                    <select id="activePitcher" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl"></select>
+                    
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="recordPitching('K', '#dc2626')" class="p-4 bg-red-600/20 hover:bg-red-600/40 border border-red-600/50 rounded-xl font-bold text-red-400">PONCHE (K)</button>
-                        <button onclick="recordPitching('OUT', '#475569')" class="p-4 bg-slate-700 hover:bg-slate-600 border border-slate-600 rounded-xl font-bold">OUT (Contacto)</button>
-                        <button onclick="recordPitching('HIT', '#ea580c')" class="p-4 bg-orange-600/20 hover:bg-orange-600/40 border border-orange-600/50 rounded-xl font-bold text-orange-400">HIT RECIBIDO</button>
-                        <button onclick="recordPitching('BB', '#2563eb')" class="p-4 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-600/50 rounded-xl font-bold text-blue-400">BB-P (Caminado)</button>
-                        <button onclick="recordPitching('ER', '#fca5a5')" class="p-4 bg-red-900/40 hover:bg-red-900/60 border border-red-900/50 rounded-xl font-bold text-red-200">CARRERA LIMPIA</button>
-                        <button onclick="recordPitching('UER', '#94a3b8')" class="p-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-xl font-bold text-slate-400">CARRERA SUCIA</button>
+                        <button onclick="recordPitching('K')" class="p-4 bg-red-600/20 border border-red-600/50 rounded-xl font-bold text-red-400">PONCHE (K)</button>
+                        <button onclick="recordPitching('OUT')" class="p-4 bg-slate-700 border border-slate-600 rounded-xl font-bold">OUT (Contacto)</button>
+                        <button onclick="recordPitching('HIT')" class="p-4 bg-orange-600/20 border border-orange-600/50 rounded-xl font-bold text-orange-400">HIT RECIBIDO</button>
+                        <button onclick="recordPitching('BB')" class="p-4 bg-blue-600/20 border border-blue-600/50 rounded-xl font-bold text-blue-400">BB PERMITIDO</button>
+                        
+                        <button onclick="recordPitching('CS')" class="p-4 bg-teal-600/20 border border-teal-500/50 rounded-xl font-bold text-teal-400 col-span-2" title="Agarrar Corredor Robando">AGARRADO ROBANDO (CS)</button>
+                        
+                        <button onclick="recordPitching('ERR')" class="p-3 bg-amber-600/20 border border-amber-600/50 rounded-xl font-bold text-amber-400 col-span-2">ERROR COMETIDO (E)</button>
+                        
+                        <button onclick="recordPitching('ER')" class="p-4 bg-red-900/40 border border-red-900/50 rounded-xl font-bold text-red-200 col-span-2">CARRERA PERMITIDA</button>
                     </div>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="card p-5 bg-slate-900/80 border border-blue-900/30">
-                    <h3 class="text-xs font-black text-blue-500 uppercase mb-4">Eventos Recientes (Bateo)</h3>
-                    <div id="battingEvents" class="space-y-2 max-h-60 overflow-y-auto"></div>
-                </div>
-                <div class="card p-5 bg-slate-900/80 border border-red-900/30">
-                    <h3 class="text-xs font-black text-red-500 uppercase mb-4">Eventos Recientes (Pitcheo)</h3>
-                    <div id="pitchingEvents" class="space-y-2 max-h-60 overflow-y-auto"></div>
+                    <button onclick="changeInningSide()" class="mt-4 w-full p-3 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-black uppercase tracking-widest border border-slate-600">Cambiar Mitad del Inning Manulmente</button>
                 </div>
             </div>
         </section>
 
-        <section id="section-stats" class="hidden space-y-8">
-            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-blue-600 pb-2 italic">Dashboard de Jugadores</h2>
-            <div id="statsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
-            
-            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-red-600 pb-2 italic">Bitácora Completa de Jugadas</h2>
-            <div class="card overflow-hidden">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-800 text-slate-400 uppercase text-[10px] font-black">
-                        <tr>
-                            <th class="p-4">Hora</th>
-                            <th class="p-4">Jugador</th>
-                            <th class="p-4">Acción</th>
-                            <th class="p-4 text-right">Módulo</th>
-                        </tr>
-                    </thead>
-                    <tbody id="fullHistoryLog" class="divide-y divide-slate-700"></tbody>
-                </table>
+        <section id="section-stats" class="hidden space-y-6">
+            <div class="flex justify-between items-center border-b-2 border-blue-600 pb-2">
+                <h2 class="text-2xl font-black text-white uppercase">Estadísticas de Temporada</h2>
+                <button onclick="resetSeasonStats()" class="bg-red-600 hover:bg-red-700 text-xs font-black px-4 py-2 rounded-lg tracking-wider">RESETEAR NÚMEROS</button>
             </div>
+            <div id="statsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
         </section>
 
         <section id="section-setup" class="hidden">
@@ -178,12 +185,12 @@
                     <button onclick="addPlayer()" class="btn-primary px-5 py-2 rounded-lg font-black">AÑADIR</button>
                 </div>
                 <div id="playerList" class="space-y-2"></div>
-                <button onclick="clearHistory()" class="mt-8 text-red-500 text-xs font-black block mx-auto uppercase underline">Borrar Todo el Historial</button>
+                <button onclick="clearHistory()" class="mt-8 text-red-500 text-xs font-black block mx-auto uppercase underline tracking-widest">Borrar Toda la Base de Datos</button>
             </div>
         </section>
     </div>
 
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-300 bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black z-50 text-center border-4 border-blue-600"></div>
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-300 bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black z-50 border-4 border-blue-600 text-center"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
@@ -193,41 +200,29 @@
             apiKey: "AIzaSyBFCmkqnOiDWc5xvPct69euRqVWsbnbYAM",
             authDomain: "mlb-coop.firebaseapp.com",
             projectId: "mlb-coop",
-            storageBucket: "mlb-coop.firebasestorage.app",
-            messagingSenderId: "154154026747",
-            appId: "1:154154026747:web:845a3314288d82dfa3125e",
-            measurementId: "G-FL61M9P4QQ",
             databaseURL: "https://mlb-coop-default-rtdb.firebaseio.com"
         };
-
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         let players = [];
         let isGameActive = false;
-        let currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
-        let historyLogs = { batting: [], pitching: [] };
+        // Registro de bases: false = vacía, true = ocupada
+        let currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1, isTopInning: true, bases: { b1: false, b2: false, b3: false } };
         let activeSelection = { batterId: "", pitcherId: "" };
 
-        const SPRITES = {
-            heman: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9iZCZjdD1z/3o7TKpXXqZ7XmN4gPS/giphy.gif",
-            skeletor: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9iZCZjdD1z/3o7TKpN3vV8hR8v98Y/giphy.gif"
-        };
-
         function save() {
-            db.ref('gameData').set({ players, score: currentGameScore, isGameActive, logs: historyLogs, activeSelection });
+            db.ref('gameData').set({ players, score: currentGameScore, isGameActive, activeSelection });
         }
 
         db.ref('gameData').on('value', (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 players = data.players || [];
-                currentGameScore = data.score || { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
+                currentGameScore = data.score || { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1, isTopInning: true, bases: { b1: false, b2: false, b3: false } };
+                if(!currentGameScore.bases) currentGameScore.bases = { b1: false, b2: false, b3: false };
                 isGameActive = data.isGameActive || false;
-                historyLogs = data.logs || { batting: [], pitching: [] };
                 activeSelection = data.activeSelection || { batterId: "", pitcherId: "" };
-                if(!historyLogs.batting) historyLogs.batting = [];
-                if(!historyLogs.pitching) historyLogs.pitching = [];
                 updateUI();
             }
         });
@@ -235,196 +230,251 @@
         function updateUI() {
             document.getElementById('score-runs').innerText = currentGameScore.runs;
             document.getElementById('score-allowed').innerText = currentGameScore.allowed;
-            document.getElementById('display-inning').innerText = currentGameScore.inning;
             
+            // Render del Inning con su parte respectiva (Alta / Baja)
+            const sideText = currentGameScore.isTopInning ? "ALTA" : "BAJA";
+            const sideArrow = currentGameScore.isTopInning ? "▲" : "▼";
+            document.getElementById('inning-display').innerHTML = `<span>${sideText} ${currentGameScore.inning}</span> <span class="text-[10px]">${sideArrow}</span>`;
+            
+            // Actualización de los rombos de base en pantalla
+            document.getElementById('base-1').className = `base-diamond absolute right-0 ${currentGameScore.bases.b1 ? 'base-active' : ''}`;
+            document.getElementById('base-2').className = `base-diamond absolute top-0 ${currentGameScore.bases.b2 ? 'base-active' : ''}`;
+            document.getElementById('base-3').className = `base-diamond absolute left-0 ${currentGameScore.bases.b3 ? 'base-active' : ''}`;
+
             const bDots = document.getElementById('bat-outs').children;
+            const pDots = document.getElementById('pitch-outs').children;
             for(let i=0; i<3; i++) {
-                bDots[i].style.backgroundColor = i < (currentGameScore.pitchOuts || currentGameScore.batOuts) ? '#3b82f6' : '#334155';
+                bDots[i].style.backgroundColor = i < currentGameScore.batOuts ? '#3b82f6' : '#334155';
+                pDots[i].style.backgroundColor = i < currentGameScore.pitchOuts ? '#ef4444' : '#334155';
             }
 
             updateStatusUI();
-            renderLogs();
             renderStats();
             renderPlayerList();
             updateDropdowns();
-            updateCharacters();
-            renderFullHistory();
         }
 
-        function recordBatting(type, color) {
+        function recordBatting(type) {
             const pid = activeSelection.batterId;
-            if(!pid) return showToast("⚠️ Selecciona un bateador");
+            if(!pid) return showToast("⚠️ SELECCIONA UN BATEADOR");
             const p = players.find(x => x.id == pid);
             
-            const timestamp = Date.now();
+            // Forzar inicialización de todos los campos estadísticos requeridos
+            if(!p.stats.extra) p.stats.extra = { h1: 0, h2: 0, h3: 0, bb: 0, outs: 0, sb: 0, cs: 0, errors: 0 };
 
-            // Lógica de conteo ofensivo
             if (['H','2B','3B','HR','OUT','K'].includes(type)) p.stats.atBats++;
             if (['H','2B','3B','HR'].includes(type)) p.stats.hits++;
             
-            if (type === '2B') p.stats.h2b = (p.stats.h2b || 0) + 1;
-            if (type === '3B') p.stats.h3b = (p.stats.h3b || 0) + 1;
-            if (type === 'HR') { p.stats.hr++; p.stats.rbi++; currentGameScore.runs++; showHR(); }
-            if (type === 'BB') p.stats.bb = (p.stats.bb || 0) + 1;
-            if (type === 'K') p.stats.k_received = (p.stats.k_received || 0) + 1;
+            if (type === 'H') { p.stats.extra.h1++; advanceRunners(1); }
+            if (type === '2B') { p.stats.extra.h2++; advanceRunners(2); }
+            if (type === '3B') { p.stats.extra.h3++; advanceRunners(3); }
+            if (type === 'BB') { p.stats.extra.bb++; advanceRunners(1, true); }
+            if (type === 'HR') { p.stats.hr++; p.stats.rbi++; currentGameScore.runs++; advanceRunners(4); showHR(); }
             if (type === 'RBI') { p.stats.rbi++; currentGameScore.runs++; }
-            if (type === 'OUT' || type === 'K') currentGameScore.batOuts++;
-
-            addLog('batting', p.name, type, color, timestamp);
-            if (type !== 'RBI') rotatePlayer('batter');
-
-            if (currentGameScore.batOuts >= 3) {
-                showToast("🛑 3 OUTS - CAMBIO");
-                currentGameScore.batOuts = 0;
-            }
-            save();
-        }
-
-        function recordPitching(type, color) {
-            const pid = activeSelection.pitcherId;
-            if(!pid) return showToast("⚠️ Selecciona un pitcher");
-            const p = players.find(x => x.id == pid);
-
-            if (type === 'K') { p.stats.pk++; currentGameScore.pitchOuts++; p.stats.outs = (p.stats.outs || 0) + 1; }
-            if (type === 'OUT') { currentGameScore.pitchOuts++; p.stats.outs = (p.stats.outs || 0) + 1; }
-            if (type === 'HIT') p.stats.hits_allowed = (p.stats.hits_allowed || 0) + 1;
-            if (type === 'BB') p.stats.bb_allowed = (p.stats.bb_allowed || 0) + 1;
-            if (type === 'ER') { p.stats.pruns++; currentGameScore.allowed++; }
-            if (type === 'UER') { p.stats.uer = (p.stats.uer || 0) + 1; currentGameScore.allowed++; }
-
-            addLog('pitching', p.name, type, color, Date.now());
-
-            if (currentGameScore.pitchOuts >= 3) {
-                showToast("✅ INNING TERMINADO");
-                currentGameScore.pitchOuts = 0;
-                currentGameScore.inning++;
-                rotatePlayer('pitcher');
-            }
-            save();
-        }
-
-        function deleteLog(side, timestamp) {
-            if(!confirm("¿Borrar este registro y revertir estadísticas?")) return;
-            const logIndex = historyLogs[side].findIndex(l => l.timestamp === timestamp);
-            if(logIndex === -1) return;
             
-            const log = historyLogs[side][logIndex];
-            const p = players.find(x => x.name === log.name);
+            // Casos de Outs Bateando
+            if (type === 'OUT' || type === 'K') { 
+                p.stats.extra.outs++; 
+                currentGameScore.batOuts++; 
+            }
+            
+            // Casos de Robos
+            if (type === 'BR') { 
+                p.stats.extra.sb++; 
+                showToast(`🏃‍♂️ ¡ROBO EXITOSO DE ${p.name.toUpperCase()}!`);
+            }
+            if (type === 'OR') { 
+                p.stats.extra.cs++; 
+                currentGameScore.batOuts++; 
+                showToast(`❌ ATRAPADO ROBANDO EN BASE`);
+            }
 
-            if(p) {
-                if(side === 'batting') {
-                    if (['H','2B','3B','HR','OUT','K'].includes(log.type)) p.stats.atBats--;
-                    if (['H','2B','3B','HR'].includes(log.type)) p.stats.hits--;
-                    if (log.type === '2B') p.stats.h2b--;
-                    if (log.type === '3B') p.stats.h3b--;
-                    if (log.type === 'HR') { p.stats.hr--; p.stats.rbi--; currentGameScore.runs--; }
-                    if (log.type === 'BB') p.stats.bb--;
-                    if (log.type === 'K') p.stats.k_received--;
-                    if (log.type === 'RBI') { p.stats.rbi--; currentGameScore.runs--; }
-                    if (log.type === 'OUT' || log.type === 'K') currentGameScore.batOuts = Math.max(0, currentGameScore.batOuts - 1);
-                } else {
-                    if (log.type === 'K') { p.stats.pk--; currentGameScore.pitchOuts = Math.max(0, currentGameScore.pitchOuts - 1); p.stats.outs--; }
-                    if (log.type === 'OUT') { currentGameScore.pitchOuts = Math.max(0, currentGameScore.pitchOuts - 1); p.stats.outs--; }
-                    if (log.type === 'HIT') p.stats.hits_allowed--;
-                    if (log.type === 'BB') p.stats.bb_allowed--;
-                    if (log.type === 'ER') { p.stats.pruns--; currentGameScore.allowed--; }
-                    if (log.type === 'UER') { p.stats.uer--; currentGameScore.allowed--; }
+            if (type !== 'RBI' && type !== 'BR' && type !== 'OR') rotatePlayer('batter');
+            
+            // Verificación limpia de 3 outs de bateo por separado
+            if (currentGameScore.batOuts >= 3) { 
+                currentGameScore.batOuts = 0; 
+                clearBases();
+                showToast("🛑 3 OUTS BATEANDO - CAMBIO DE LADO"); 
+            }
+            save();
+        }
+
+        function recordPitching(type) {
+            const pid = activeSelection.pitcherId;
+            if(!pid) return showToast("⚠️ SELECCIONA UN PITCHER");
+            const p = players.find(x => x.id == pid);
+            if(!p.stats.extra) p.stats.extra = { h1: 0, h2: 0, h3: 0, bb: 0, outs: 0, sb: 0, cs: 0, errors: 0 };
+
+            if (type === 'K') { p.stats.pk++; currentGameScore.pitchOuts++; }
+            if (type === 'OUT') currentGameScore.pitchOuts++;
+            if (type === 'ER') { p.stats.pruns++; currentGameScore.allowed++; }
+            
+            // Agarró robando (Pickoff / Asistencia Receptor)
+            if (type === 'CS') { 
+                p.stats.extra.cs++; 
+                currentGameScore.pitchOuts++; 
+                showToast("🎯 ¡LO AGARRÓ ROBANDO!");
+            }
+            
+            // Registro estricto de errores de fildeo / pitcheo
+            if (type === 'ERR') { 
+                p.stats.extra.errors++; 
+                showToast("⚠️ ERROR REGISTRADO EN LA DEFENSA");
+            }
+
+            // Verificación limpia de 3 outs de pitcheo por separado
+            if (currentGameScore.pitchOuts >= 3) {
+                currentGameScore.pitchOuts = 0;
+                clearBases();
+                rotatePlayer('pitcher');
+                // Al completarse los outs de pitcheo, avanza automáticamente de fracción de Inning
+                autoAdvanceInning();
+            }
+            save();
+        }
+
+        // Lógica de avance de bases automática
+        function advanceRunners(basesAdvanced, isWalk = false) {
+            let runsScored = 0;
+            if (basesAdvanced === 4) {
+                if(currentGameScore.bases.b1) runsScored++;
+                if(currentGameScore.bases.b2) runsScored++;
+                if(currentGameScore.bases.b3) runsScored++;
+                runsScored++;
+                currentGameScore.bases = { b1: false, b2: false, b3: false };
+            } else if (isWalk) {
+                if (currentGameScore.bases.b1) {
+                    if (currentGameScore.bases.b2) {
+                        if (currentGameScore.bases.b3) runsScored++;
+                        currentGameScore.bases.b3 = true;
+                    }
+                    currentGameScore.bases.b2 = true;
+                }
+                currentGameScore.bases.b1 = true;
+            } else {
+                for (let i = 0; i < basesAdvanced; i++) {
+                    if (currentGameScore.bases.b3) { runsScored++; currentGameScore.bases.b3 = false; }
+                    if (currentGameScore.bases.b2) { currentGameScore.bases.b3 = true; currentGameScore.bases.b2 = false; }
+                    if (currentGameScore.bases.b1) { currentGameScore.bases.b2 = true; currentGameScore.bases.b1 = false; }
+                    if (i === 0) currentGameScore.bases.b1 = true;
                 }
             }
-            historyLogs[side].splice(logIndex, 1);
+            if(runsScored > 0) {
+                currentGameScore.runs += runsScored;
+                showToast(`🎉 ¡ANOTADAS +${runsScored} CARRERAS!`);
+            }
+        }
+
+        function toggleManualBase(num) {
+            if(num === 1) currentGameScore.bases.b1 = !currentGameScore.bases.b1;
+            if(num === 2) currentGameScore.bases.b2 = !currentGameScore.bases.b2;
+            if(num === 3) currentGameScore.bases.b3 = !currentGameScore.bases.b3;
+            save();
+        }
+
+        function clearBases() {
+            currentGameScore.bases = { b1: false, b2: false, b3: false };
+        }
+
+        function autoAdvanceInning() {
+            if (currentGameScore.isTopInning) {
+                currentGameScore.isTopInning = false; // Pasa de alta a baja
+                showToast("📝 MITAD DEL INNING - PARTE BAJA");
+            } else {
+                currentGameScore.isTopInning = true; // Sube al siguiente inning parte alta
+                currentGameScore.inning++;
+                showToast(`⚾ INNING COMPLETADO - INICIA INNING ${currentGameScore.inning}`);
+            }
+        }
+
+        function changeInningSide() {
+            currentGameScore.isTopInning = !currentGameScore.isTopInning;
+            showToast(currentGameScore.isTopInning ? "CAMBIO A PARTE ALTA ▲" : "CAMBIO A PARTE BAJA ▼");
             save();
         }
 
         function renderStats() {
             document.getElementById('statsContainer').innerHTML = players.map(p => {
-                const s = p.stats;
-                const avg = s.atBats > 0 ? (s.hits / s.atBats).toFixed(3) : ".000";
+                const ext = p.stats.extra || { h1: 0, h2: 0, h3: 0, bb: 0, outs: 0, sb: 0, cs: 0, errors: 0 };
+                const rawAvg = p.stats.atBats > 0 ? (p.stats.hits / p.stats.atBats).toFixed(3) : "000";
+                const avgDisplay = rawAvg.toString().replace("0.", "").replace("1.000", "1000");
                 
-                // Slugging: (1B + 2*2B + 3*3B + 4*HR) / AB
-                const h1b = s.hits - (s.h2b||0) - (s.h3b||0) - s.hr;
-                const slug = s.atBats > 0 ? ((h1b + (s.h2b||0)*2 + (s.h3b||0)*3 + s.hr*4) / s.atBats).toFixed(3) : ".000";
-                
-                // Pitching metrics
-                const ip = Math.floor((s.outs||0)/3) + "." + ((s.outs||0)%3);
-                const inningsVal = (s.outs||0)/3;
-                const era = inningsVal > 0 ? ((s.pruns * 9) / inningsVal).toFixed(2) : "0.00";
-                const whip = inningsVal > 0 ? (((s.hits_allowed||0) + (s.bb_allowed||0)) / inningsVal).toFixed(2) : "0.00";
+                // ERA de por vida en el sistema
+                const era = p.stats.pruns > 0 ? ((p.stats.pruns * 3) / Math.max(1, (p.stats.pk/2))).toFixed(2) : "0.00";
 
                 return `
-                <div class="card p-5 border-l-4 ${p.name.toLowerCase().includes('beto') ? 'border-blue-500' : 'border-red-500'}">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="text-xl font-black uppercase text-white">${p.name}</h3>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Estadísticas de Temporada</p>
-                        </div>
+                <div class="card p-5 border-l-4 border-blue-500">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-black uppercase">${p.name}</h3>
                         <div class="flex gap-2">
-                            <div class="text-center bg-slate-800 px-3 py-1 rounded">
-                                <p class="text-[8px] text-blue-400 font-black">AVG</p>
-                                <p class="text-sm font-black">${avg}</p>
-                            </div>
-                            <div class="text-center bg-slate-800 px-3 py-1 rounded">
-                                <p class="text-[8px] text-yellow-400 font-black">SLG</p>
-                                <p class="text-sm font-black">${slug}</p>
-                            </div>
+                            <span class="bg-blue-600 px-2 py-1 rounded text-[10px] font-bold text-white">AVG: ${avgDisplay}</span>
+                            <span class="bg-red-600 px-2 py-1 rounded text-[10px] font-bold text-white">ERA: ${era}</span>
                         </div>
                     </div>
-
-                    <div class="grid grid-cols-4 gap-2 mb-6">
-                        <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">2B</p><p class="font-bold">${s.h2b||0}</p>
+                    <div class="grid grid-cols-4 gap-2 text-center text-xs">
+                        <div class="bg-slate-800 p-2 rounded">
+                            <p class="text-[8px] text-slate-400">VB</p><p class="font-bold">${p.stats.atBats}</p>
                         </div>
-                        <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">3B</p><p class="font-bold">${s.h3b||0}</p>
+                        <div class="bg-slate-800 p-2 rounded">
+                            <p class="text-[8px] text-slate-400">HITS</p><p class="font-bold">${p.stats.hits}</p>
                         </div>
-                        <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">HR</p><p class="font-bold">${s.hr}</p>
+                        <div class="bg-slate-800 p-2 rounded">
+                            <p class="text-[8px] text-slate-400">1B</p><p class="font-bold">${ext.h1||0}</p>
                         </div>
-                        <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">RBI</p><p class="font-bold">${s.rbi}</p>
+                        <div class="bg-slate-800 p-2 rounded">
+                            <p class="text-[8px] text-slate-400">2B/3B</p><p class="font-bold">${ext.h2||0}/${ext.h3||0}</p>
                         </div>
-                        <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">BB</p><p class="font-bold">${s.bb||0}</p>
+                        <div class="bg-slate-800 p-2 rounded">
+                            <p class="text-[8px] text-slate-400">HR</p><p class="font-bold">${p.stats.hr}</p>
                         </div>
-                        <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-red-500 font-bold">K-REC</p><p class="font-bold">${s.k_received||0}</p>
+                        <div class="bg-slate-800 p-2 rounded">
+                            <p class="text-[8px] text-slate-400">RBI</p><p class="font-bold">${p.stats.rbi}</p>
                         </div>
-                        <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">AB</p><p class="font-bold">${s.atBats}</p>
+                        <div class="bg-slate-800 p-2 rounded">
+                            <p class="text-[8px] text-slate-400">BB</p><p class="font-bold">${ext.bb||0}</p>
                         </div>
-                        <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">H</p><p class="font-bold">${s.hits}</p>
+                        <div class="bg-slate-800 p-2 rounded text-cyan-400">
+                            <p class="text-[8px] text-slate-400">ROBOS (BR)</p><p class="font-bold">${ext.sb||0}</p>
                         </div>
-                    </div>
-
-                    <div class="border-t border-slate-700 pt-4">
-                        <div class="flex justify-between items-center mb-3">
-                            <p class="text-[10px] font-black text-red-400 uppercase tracking-tighter">Pitching Stats</p>
-                            <div class="flex gap-4">
-                                <p class="text-xs font-bold">IP: <span class="text-white">${ip}</span></p>
-                                <p class="text-xs font-bold text-red-400">ERA: ${era}</p>
-                                <p class="text-xs font-bold text-orange-400">WHIP: ${whip}</p>
-                            </div>
+                        <div class="bg-slate-800 p-2 rounded text-rose-400">
+                            <p class="text-[8px] text-slate-400">OUT ROB (OR)</p><p class="font-bold">${ext.cs||0}</p>
                         </div>
-                        <div class="grid grid-cols-4 gap-2">
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase">K-Recet.</p><p class="font-bold text-white">${s.pk}</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase">C. Limpias</p><p class="font-bold text-red-300">${s.pruns}</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase">C. Sucias</p><p class="font-bold text-slate-400">${s.uer||0}</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase">BB-Perm.</p><p class="font-bold text-blue-300">${s.bb_allowed||0}</p>
-                            </div>
+                        <div class="bg-slate-800 p-2 rounded text-red-400">
+                            <p class="text-[8px] text-slate-400">K PITCH</p><p class="font-bold">${p.stats.pk}</p>
+                        </div>
+                        <div class="bg-slate-800 p-2 rounded text-amber-400">
+                            <p class="text-[8px] text-slate-400">ERRORES (E)</p><p class="font-bold">${ext.errors||0}</p>
+                        </div>
+                        <div class="bg-slate-800 p-2 rounded text-red-300">
+                            <p class="text-[8px] text-slate-400">C. PERM</p><p class="font-bold">${p.stats.pruns}</p>
                         </div>
                     </div>
                 </div>`;
             }).join('');
         }
 
-        // --- FUNCIONES CORE (SE MANTIENE LÓGICA PREVIA) ---
+        function resetSeasonStats() {
+            if(confirm("¿Poner todas las estadísticas de los jugadores en 0? (No se borrarán los nombres)")) {
+                players.forEach(p => {
+                    p.stats = { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0, extra: {h1:0, h2:0, h3:0, bb:0, outs:0, sb:0, cs:0, errors:0} };
+                });
+                save();
+            }
+        }
+
+        function toggleGame() {
+            if (!isGameActive) {
+                if (players.length === 0) return showToast("⚠️ ¡Añade jugadores primero!");
+                isGameActive = true;
+                currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1, isTopInning: true, bases: { b1: false, b2: false, b3: false } };
+                activeSelection = { batterId: players[0].id, pitcherId: players[0].id };
+            } else {
+                if (!confirm("¿Finalizar partido actual?")) return;
+                isGameActive = false;
+            }
+            save();
+        }
 
         function rotatePlayer(type) {
             if (players.length < 2) return;
@@ -432,48 +482,6 @@
             let currentIndex = players.findIndex(p => p.id == currentId);
             let nextIndex = (currentIndex + 1) % players.length;
             activeSelection[type === 'batter' ? 'batterId' : 'pitcherId'] = players[nextIndex].id;
-        }
-
-        function manualUserChange() {
-            activeSelection.batterId = document.getElementById('activeBatter').value;
-            activeSelection.pitcherId = document.getElementById('activePitcher').value;
-            save();
-        }
-
-        function addLog(side, name, type, color, timestamp) {
-            const log = { name, type, color, timestamp, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
-            historyLogs[side].unshift(log);
-            if (historyLogs[side].length > 50) historyLogs[side].pop();
-        }
-
-        function renderLogs() {
-            const template = (l, side) => `
-                <div class="flex justify-between items-center p-2 bg-slate-800 rounded border-l-4 mb-1 group" style="border-color: ${l.color}">
-                    <div><span class="font-bold text-xs">${l.name}</span><span class="font-black ml-2 text-xs" style="color: ${l.color}">${l.type}</span></div>
-                    <button onclick="deleteLog('${side}', ${l.timestamp})" class="opacity-0 group-hover:opacity-100 bg-red-600 text-white text-[9px] px-2 py-1 rounded transition-all font-bold">UNDO</button>
-                </div>`;
-            document.getElementById('battingEvents').innerHTML = (historyLogs.batting || []).slice(0, 10).map(l => template(l, 'batting')).join('');
-            document.getElementById('pitchingEvents').innerHTML = (historyLogs.pitching || []).slice(0, 10).map(l => template(l, 'pitching')).join('');
-        }
-
-        function renderFullHistory() {
-            const all = [...(historyLogs.batting || []), ...(historyLogs.pitching || [])].sort((a, b) => b.timestamp - a.timestamp);
-            document.getElementById('fullHistoryLog').innerHTML = all.map(l => `
-                <tr>
-                    <td class="p-4 text-slate-500 font-mono text-[10px]">${l.time}</td>
-                    <td class="p-4 font-bold text-blue-400">${l.name}</td>
-                    <td class="p-4"><span class="px-2 py-1 rounded text-[10px] font-black" style="background: ${l.color}33; color: ${l.color}">${l.type}</span></td>
-                    <td class="p-4 text-right text-[10px] font-black text-slate-600">${historyLogs.batting.includes(l) ? 'OFENSIVA' : 'BULLPEN'}</td>
-                </tr>`).join('');
-        }
-
-        function addPlayer() {
-            const input = document.getElementById('playerNameInput');
-            const name = input.value.trim();
-            if (name) {
-                players.push({ id: Date.now(), name, stats: { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0, h2b:0, h3b:0, bb:0, k_received:0, uer:0, outs:0, hits_allowed:0, bb_allowed:0 } });
-                input.value = ''; save();
-            }
         }
 
         function updateDropdowns() {
@@ -485,22 +493,9 @@
             if(activeSelection.pitcherId) pSelect.value = activeSelection.pitcherId;
         }
 
-        function updateCharacters() {
-            const bName = (players.find(p => p.id == activeSelection.batterId)?.name || "").toLowerCase();
-            const pName = (players.find(p => p.id == activeSelection.pitcherId)?.name || "").toLowerCase();
-            document.getElementById('batter-sprite-container').innerHTML = bName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : (bName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : "");
-            document.getElementById('pitcher-sprite-container').innerHTML = pName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : (pName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : "");
-        }
-
-        function toggleGame() {
-            if (!isGameActive) {
-                if (players.length === 0) return showToast("⚠️ ¡Añade jugadores!");
-                isGameActive = true;
-                currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
-            } else {
-                if (!confirm("¿Finalizar partido?")) return;
-                isGameActive = false;
-            }
+        function manualUserChange() {
+            activeSelection.batterId = document.getElementById('activeBatter').value;
+            activeSelection.pitcherId = document.getElementById('activePitcher').value;
             save();
         }
 
@@ -511,15 +506,25 @@
             if (isGameActive) {
                 controls.classList.remove('opacity-30', 'pointer-events-none');
                 document.getElementById('game-btn-text').innerText = "FINALIZAR PARTIDO";
-                btn.classList.replace('bg-green-600', 'bg-red-600');
+                btn.className = "px-8 py-3 bg-red-600 hover:bg-red-500 text-white rounded-full font-black text-lg shadow-lg flex items-center gap-3";
                 indicator.innerText = "• PARTIDO EN VIVO •";
-                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-green-500/20 text-green-400 border border-green-500/50 w-fit";
+                indicator.className = "px-4 py-1 rounded-full text-xs font-black bg-green-500/20 text-green-400 border border-green-500/50 w-fit";
             } else {
                 controls.classList.add('opacity-30', 'pointer-events-none');
                 document.getElementById('game-btn-text').innerText = "EMPEZAR PARTIDO";
-                btn.classList.replace('bg-red-600', 'bg-green-600');
+                btn.className = "px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-full font-black text-lg shadow-lg flex items-center gap-3";
                 indicator.innerText = "ESPERANDO PARTIDO";
-                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/50 w-fit";
+                indicator.className = "px-4 py-1 rounded-full text-xs font-black bg-red-500/20 text-red-400 border border-red-500/50 w-fit";
+            }
+        }
+
+        function addPlayer() {
+            const input = document.getElementById('playerNameInput');
+            const name = input.value.trim();
+            if (name) {
+                players.push({ id: Date.now(), name, stats: { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0, extra: {h1:0, h2:0, h3:0, bb:0, outs:0, sb:0, cs:0, errors:0} } });
+                input.value = '';
+                save();
             }
         }
 
@@ -528,19 +533,40 @@
                 <div class="flex justify-between p-3 bg-slate-800 rounded-xl mb-2 border border-slate-700">
                     <span>👤 ${p.name}</span>
                     <button onclick="removePlayer(${p.id})" class="text-red-400">✕</button>
-                </div>`).join('');
+                </div>
+            `).join('');
         }
 
-        function removePlayer(id) { if(confirm("¿Eliminar?")) { players = players.filter(p => p.id !== id); save(); } }
+        function removePlayer(id) { if(confirm("¿Eliminar de la base de datos?")) { players = players.filter(p => p.id !== id); save(); } }
+
         function viewSection(id) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
             document.getElementById('section-' + id).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-blue-600', 'text-white'));
             document.getElementById('nav-' + id).classList.add('bg-blue-600', 'text-white');
         }
-        function clearHistory() { if(confirm("¿BORRAR TODO?")) { players = []; isGameActive = false; historyLogs = { batting: [], pitching: [] }; save(); } }
-        function showHR() { const ov = document.getElementById('hr-overlay'); ov.style.display = 'flex'; setTimeout(() => ov.style.display = 'none', 3500); }
-        function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.remove('opacity-0', 'translate-y-24'); setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2500); }
+
+        function clearHistory() {
+            if(confirm("¿ELIMINAR TODO EL HISTORIAL Y TODOS LOS JUGADORES?")) {
+                players = []; isGameActive = false;
+                currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1, isTopInning: true, bases: { b1: false, b2: false, b3: false } };
+                activeSelection = { batterId: "", pitcherId: "" };
+                save();
+            }
+        }
+
+        function showHR() {
+            const ov = document.getElementById('hr-overlay');
+            ov.style.display = 'flex';
+            setTimeout(() => ov.style.display = 'none', 2500);
+        }
+
+        function showToast(m) {
+            const t = document.getElementById('toast');
+            t.innerText = m; t.classList.remove('opacity-0', 'translate-y-24');
+            setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2500);
+        }
+
         window.onload = () => viewSection('game');
     </script>
 </body>
