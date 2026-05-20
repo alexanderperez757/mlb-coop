@@ -254,7 +254,6 @@
             heman: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9iZCZjdD1z/3o7TKpXXqZ7XmN4gPS/giphy.gif",
             skeletor: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHpxZW5rN3FqN3RxeW9zNnltbmZ6bmZ6bmZ6bmZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9iZCZjdD1z/3o7TKpN3vV8hR8v98Y/giphy.gif"
         };
-
         function save() {
             db.ref('gameData').set({ players, score: currentGameScore, isGameActive, logs: historyLogs, activeSelection });
         }
@@ -267,13 +266,11 @@
                 if(!currentGameScore.bases) currentGameScore.bases = { 1: false, 2: false, 3: false };
                 if(currentGameScore.pitchOuts === undefined) currentGameScore.pitchOuts = 0;
                 if(currentGameScore.batOuts === undefined) currentGameScore.batOuts = 0;
-                
                 isGameActive = data.isGameActive || false;
                 historyLogs = data.logs || { batting: [], pitching: [] };
                 activeSelection = data.activeSelection || { batterId: "", pitcherId: "" };
                 if(!historyLogs.batting) historyLogs.batting = [];
                 if(!historyLogs.pitching) historyLogs.pitching = [];
- 
                 updateUI();
             }
         });
@@ -285,7 +282,6 @@
             
             const esAlta = currentGameScore.inning % 1 === 0; 
             document.getElementById('display-part').innerText = esAlta ? "ALTA" : "BAJA";
-
             document.getElementById('text-outs-bat').innerText = currentGameScore.batOuts;
             const bDots = document.getElementById('bat-outs').children;
             for(let i=0; i<3; i++) {
@@ -336,20 +332,18 @@
             const p = players.find(x => x.id == pid);
             
             const timestamp = Date.now();
-            
             if(!p.stats.stolen_bases) p.stats.stolen_bases = 0;
             if(!p.stats.caught_stealing) p.stats.caught_stealing = 0;
             if(!p.stats.outs_on_base) p.stats.outs_on_base = 0;
 
             if (['H','2B','3B','HR','OUT','K','OC'].includes(type)) p.stats.atBats++;
             if (['H','2B','3B','HR'].includes(type)) p.stats.hits++;
-            
             if (type === '1B' || type === 'H') shiftBases(1);
             if (type === '2B') { p.stats.h2b = (p.stats.h2b || 0) + 1; shiftBases(2); }
             if (type === '3B') { p.stats.h3b = (p.stats.h3b || 0) + 1; shiftBases(3); }
             
             if (type === 'HR') { 
-                p.stats.hr++; 
+                p.stats.hr++;
                 p.stats.rbi++; 
                 currentGameScore.runs++; 
                 showHR(); 
@@ -361,7 +355,6 @@
             if (type === 'RBI') { p.stats.rbi++; currentGameScore.runs++; }
             
             if (type === 'OUT' || type === 'K' || type === 'OC') currentGameScore.batOuts++;
-            
             if (type === 'BR') {
                 let prevIdx = getAntecessorIndex(pid);
                 if (prevIdx !== -1) {
@@ -391,7 +384,6 @@
             }
 
             if (type !== 'RBI' && type !== 'BR' && type !== 'OR' && type !== 'OC') rotatePlayer('batter');
-            
             if (currentGameScore.batOuts >= 3) {
                 showToast("🛑 3 OUTS DE BATEO - CAMBIO");
                 currentGameScore.batOuts = 0;
@@ -403,7 +395,7 @@
         function recordPitching(type, color) {
             const pid = activeSelection.pitcherId;
             if(!pid) return showToast("⚠️ Selecciona un pitcher");
-            const p = players.find(x => x.id == pid);
+            let p = players.find(x => x.id == pid);
 
             if(!p.stats.pitcher_errors) p.stats.pitcher_errors = 0;
             if(!p.stats.caught_stealing_pitcher) p.stats.caught_stealing_pitcher = 0;
@@ -416,6 +408,14 @@
             if (type === 'UER') { p.stats.uer = (p.stats.uer || 0) + 1; currentGameScore.allowed++; }
             
             if (type === 'AR') {
+                // Si en el tablero sale Nasa pichando, se le adjudica al otro usuario (el antecesor en la lista)
+                if (p.name.toLowerCase().includes('nasa')) {
+                    let prevIdx = getAntecessorIndex(p.id);
+                    if (prevIdx !== -1) {
+                        p = players[prevIdx];
+                        if(!p.stats.caught_stealing_pitcher) p.stats.caught_stealing_pitcher = 0;
+                    }
+                }
                 p.stats.caught_stealing_pitcher++;
                 currentGameScore.pitchOuts++;
                 p.stats.outs = (p.stats.outs || 0) + 1;
@@ -468,10 +468,8 @@
             if(!confirm("¿Borrar este registro y revertir estadísticas?")) return;
             const logIndex = historyLogs[side].findIndex(l => l.timestamp === timestamp);
             if(logIndex === -1) return;
-            
             const log = historyLogs[side][logIndex];
             const p = players.find(x => x.name === log.name);
-
             if(p) {
                 if(side === 'batting') {
                     if (['H','2B','3B','HR','OUT','K','OC'].includes(log.type)) p.stats.atBats--;
@@ -505,10 +503,8 @@
             document.getElementById('statsContainer').innerHTML = players.map(p => {
                 const s = p.stats;
                 const avg = s.atBats > 0 ? (s.hits / s.atBats).toFixed(3) : ".000";
-                
                 const h1b = s.hits - (s.h2b||0) - (s.h3b||0) - s.hr;
                 const slug = s.atBats > 0 ? ((h1b + (s.h2b||0)*2 + (s.h3b||0)*3 + s.hr*4) / s.atBats).toFixed(3) : ".000";
-                
                 const ip = Math.floor((s.outs||0)/3) + "." + ((s.outs||0)%3);
                 const inningsVal = (s.outs||0)/3;
                 const era = inningsVal > 0 ? ((s.pruns * 9) / inningsVal).toFixed(2) : "0.00";
@@ -532,170 +528,247 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-4 gap-2 mb-6">
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">2B</p><p class="font-bold">${s.h2b||0}</p>
+                            <p class="text-[9px] text-slate-500 font-bold">AB</p><p class="font-bold">${s.atBats}</p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">3B</p><p class="font-bold">${s.h3b||0}</p>
+                            <p class="text-[9px] text-slate-500 font-bold">H</p><p class="font-bold text-emerald-400">${s.hits}</p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">HR</p><p class="font-bold">${s.hr}</p>
+                            <p class="text-[9px] text-slate-500 font-bold">HR</p><p class="font-bold text-yellow-400">${s.hr}</p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">RBI</p><p class="font-bold">${s.rbi}</p>
+                            <p class="text-[9px] text-slate-500 font-bold">RBI</p><p class="font-bold text-purple-400">${s.rbi}</p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
                             <p class="text-[9px] text-slate-500 font-bold">BB</p><p class="font-bold">${s.bb||0}</p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-red-400 font-bold">K-REC</p><p class="font-bold">${s.k_received||0}</p>
+                            <p class="text-[9px] text-slate-500 font-bold">K Rec.</p><p class="font-bold text-red-400">${s.k_received||0}</p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">BR / OR</p><p class="font-bold text-cyan-400 text-xs">${s.stolen_bases||0} / <span class="text-rose-400">${s.caught_stealing||0}</span></p>
+                            <p class="text-[9px] text-slate-500 font-bold">BR</p><p class="font-bold text-cyan-400">${s.stolen_bases||0}</p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-rose-300 font-bold">Out Carr.</p><p class="font-bold text-xs text-rose-300">${s.outs_on_base||0}</p>
-                        </div>
-                        <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800 col-span-4">
-                            <p class="text-[9px] text-slate-500 font-bold">AB / H</p><p class="font-bold text-xs">${s.atBats} / ${s.hits}</p>
+                            <p class="text-[9px] text-slate-500 font-bold">OR / OC</p><p class="font-bold text-rose-400">${(s.caught_stealing||0) + (s.outs_on_base||0)}</p>
                         </div>
                     </div>
-
-                    <div class="border-t border-slate-700 pt-4">
-                        <div class="flex justify-between items-center mb-3">
-                            <p class="text-[10px] font-black text-red-400 uppercase tracking-tighter">Pitching Stats</p>
-                            <div class="flex gap-4">
-                                <p class="text-xs font-bold">IP: <span class="text-white">${ip}</span></p>
-                                <p class="text-xs font-bold text-red-400">ERA: ${era}</p>
-                                <p class="text-xs font-bold text-orange-400">WHIP: ${whip}</p>
+                    <div class="border-t border-slate-800 pt-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <p class="text-xs font-black text-red-400 uppercase tracking-widest">Pitcheo</p>
+                            <div class="flex gap-2">
+                                <div class="text-center bg-slate-800 px-2 py-0.5 rounded">
+                                    <span class="text-[8px] text-red-400 font-bold">ERA: ${era}</span>
+                                </div>
+                                <div class="text-center bg-slate-800 px-2 py-0.5 rounded">
+                                    <span class="text-[8px] text-blue-400 font-bold">WHIP: ${whip}</span>
+                                </div>
                             </div>
                         </div>
                         <div class="grid grid-cols-4 gap-2">
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase">K-Recet.</p><p class="font-bold text-white">${s.pk}</p>
+                            <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
+                                <p class="text-[9px] text-slate-500 font-bold">IP</p><p class="font-mono font-bold">${ip}</p>
                             </div>
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase">C. Limpias</p><p class="font-bold text-red-300">${s.pruns}</p>
+                            <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
+                                <p class="text-[9px] text-slate-500 font-bold">Ponches</p><p class="font-bold text-orange-400">${s.pk}</p>
                             </div>
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-500 uppercase">C. Sucias</p><p class="font-bold text-slate-400">${s.uer||0}</p>
+                            <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
+                                <p class="text-[9px] text-slate-500 font-bold">C. Limpias</p><p class="font-bold text-red-400">${s.pruns}</p>
                             </div>
-                            <div class="text-center">
-                                <p class="text-[9px] text-slate-400 uppercase">Err Def / AR</p><p class="font-bold text-xs text-amber-400">${s.pitcher_errors||0} / <span class="text-indigo-400">${s.caught_stealing_pitcher||0}</span></p>
+                            <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
+                                <p class="text-[9px] text-slate-500 font-bold">C. Sucias</p><p class="font-bold text-slate-400">${s.uer||0}</p>
+                            </div>
+                            <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
+                                <p class="text-[9px] text-slate-500 font-bold">H Rec.</p><p class="font-bold">${s.hits_allowed||0}</p>
+                            </div>
+                            <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
+                                <p class="text-[9px] text-slate-500 font-bold">BB Perm.</p><p class="font-bold">${s.bb_allowed||0}</p>
+                            </div>
+                            <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
+                                <p class="text-[9px] text-slate-500 font-bold">Atrap. Rob.</p><p class="font-bold text-green-400">${s.caught_stealing_pitcher||0}</p>
+                            </div>
+                            <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
+                                <p class="text-[9px] text-slate-500 font-bold">Err. Def</p><p class="font-bold text-amber-400">${s.pitcher_errors||0}</p>
                             </div>
                         </div>
                     </div>
-                </div>`;
+                </div>`.trim();
             }).join('');
         }
 
-        function rotatePlayer(type) {
-            if (players.length < 2) return;
-            const currentId = activeSelection[type === 'batter' ? 'batterId' : 'pitcherId'];
-            let currentIndex = players.findIndex(p => p.id == currentId);
-            let nextIndex = (currentIndex + 1) % players.length;
-            activeSelection[type === 'batter' ? 'batterId' : 'pitcherId'] = players[nextIndex].id;
-        }
-
-        function manualUserChange() {
-            activeSelection.batterId = document.getElementById('activeBatter').value;
-            activeSelection.pitcherId = document.getElementById('activePitcher').value;
-            save();
-        }
-
         function addLog(side, name, type, color, timestamp) {
-            const log = { name, type, color, timestamp, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) };
-            historyLogs[side].unshift(log);
-            if (historyLogs[side].length > 50) historyLogs[side].pop();
+            if(!historyLogs[side]) historyLogs[side] = [];
+            historyLogs[side].unshift({ name, type, color, timestamp });
+            if(historyLogs[side].length > 40) historyLogs[side].pop();
         }
 
         function renderLogs() {
-            const template = (l, side) => `
-                <div class="flex justify-between items-center p-2 bg-slate-800 rounded border-l-4 mb-1 group" style="border-color: ${l.color}">
-                    <div><span class="font-bold text-xs">${l.name}</span><span class="font-black ml-2 text-xs" style="color: ${l.color}">${l.type}</span></div>
-                    <button onclick="deleteLog('${side}', ${l.timestamp})" class="opacity-0 group-hover:opacity-100 bg-red-600 text-white text-[9px] px-2 py-1 rounded transition-all font-bold">UNDO</button>
-                </div>`;
-            document.getElementById('battingEvents').innerHTML = (historyLogs.batting || []).slice(0, 10).map(l => template(l, 'batting')).join('');
-            document.getElementById('pitchingEvents').innerHTML = (historyLogs.pitching || []).slice(0, 10).map(l => template(l, 'pitching')).join('');
+            const renderSide = (side, elementId) => {
+                const container = document.getElementById(elementId);
+                const logs = historyLogs[side] || [];
+                if(logs.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-slate-500 italic p-2">Sin eventos</p>`;
+                    return;
+                }
+                container.innerHTML = logs.map(l => `
+                    <div class="flex justify-between items-center bg-slate-800/60 p-2 rounded-lg border border-slate-700/50 text-xs">
+                        <span class="font-medium text-slate-300">⏱️ ${new Date(l.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}</span>
+                        <span class="font-bold text-white uppercase">${l.name}</span>
+                        <span class="px-2 py-0.5 rounded font-black uppercase text-[10px]" style="background-color: ${l.color}; color: #0f172a">${l.type}</span>
+                        <button onclick="deleteLog('${side}', ${l.timestamp})" class="text-rose-400 hover:text-rose-300 px-1 font-bold">✕</button>
+                    </div>
+                `).join('');
+            };
+            renderSide('batting', 'battingEvents');
+            renderSide('pitching', 'pitchingEvents');
         }
 
         function renderFullHistory() {
-            const all = [...(historyLogs.batting || []), ...(historyLogs.pitching || [])].sort((a, b) => b.timestamp - a.timestamp);
-            document.getElementById('fullHistoryLog').innerHTML = all.map(l => `
-                <tr>
-                    <td class="p-4 text-slate-500 font-mono text-[10px]">${l.time}</td>
-                    <td class="p-4 font-bold text-blue-400">${l.name}</td>
-                    <td class="p-4"><span class="px-2 py-1 rounded text-[10px] font-black" style="background: ${l.color}33; color: ${l.color}">${l.type}</span></td>
-                    <td class="p-4 text-right text-[10px] font-black text-slate-600">${historyLogs.batting.includes(l) ? 'OFENSIVA' : 'BULLPEN'}</td>
-                </tr>`).join('');
-        }
+            const all = [];
+            (historyLogs.batting || []).forEach(l => all.push({...l, mod: 'BATEO'}));
+            (historyLogs.pitching || []).forEach(l => all.push({...l, mod: 'PICHEO'}));
+            all.sort((a,b) => b.timestamp - a.timestamp);
 
-        function addPlayer() {
-            const input = document.getElementById('playerNameInput');
-            const name = input.value.trim();
-            if (name) {
-                players.push({ id: Date.now(), name, stats: { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0, h2b:0, h3b:0, bb:0, k_received:0, uer:0, outs:0, hits_allowed:0, bb_allowed:0, stolen_bases: 0, caught_stealing: 0, pitcher_errors: 0, caught_stealing_pitcher: 0, outs_on_base: 0 } });
-                input.value = ''; save();
+            const tbody = document.getElementById('fullHistoryLog');
+            if(all.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500 italic">No hay jugadas registradas</td></tr>`;
+                return;
             }
+            tbody.innerHTML = all.map(l => `
+                <tr class="hover:bg-slate-800/30 transition-colors">
+                    <td class="p-4 font-mono text-xs text-slate-400">${new Date(l.timestamp).toLocaleTimeString()}</td>
+                    <td class="p-4 font-bold text-white uppercase">${l.name}</td>
+                    <td class="p-4"><span class="px-2 py-0.5 rounded font-black text-[10px] uppercase" style="background-color: ${l.color}; color: #0f172a">${l.type}</span></td>
+                    <td class="p-4 text-right font-black text-[10px] tracking-wider ${l.mod==='BATEO'?'text-blue-400':'text-red-400'}">${l.mod}</td>
+                </tr>
+            `).join('');
         }
 
         function updateDropdowns() {
             const bSelect = document.getElementById('activeBatter');
             const pSelect = document.getElementById('activePitcher');
-            const options = '<option value="">ELIJE JUGADOR</option>' + players.map(p => `<option value="${p.id}">${p.name.toUpperCase()}</option>`).join('');
-            bSelect.innerHTML = options;
-            pSelect.innerHTML = options;
-            if(activeSelection.batterId) bSelect.value = activeSelection.batterId;
-            if(activeSelection.pitcherId) pSelect.value = activeSelection.pitcherId;
+            
+            const currentB = bSelect.value;
+            const currentP = pSelect.value;
+
+            const options = players.map(p => `<option value="${p.id}">${p.name.toUpperCase()}</option>`).join('');
+            
+            bSelect.innerHTML = options || '<option value="">-- SIN JUGADORES --</option>';
+            pSelect.innerHTML = options || '<option value="">-- SIN JUGADORES --</option>';
+
+            if(currentB && players.some(x=>x.id==currentB)) bSelect.value = currentB;
+            else if(players[0]) bSelect.value = players[0].id;
+
+            if(currentP && players.some(x=>x.id==currentP)) pSelect.value = currentP;
+            else if(players[1]) pSelect.value = players[1].id;
+            else if(players[0]) pSelect.value = players[0].id;
+
+            activeSelection.batterId = bSelect.value;
+            activeSelection.pitcherId = pSelect.value;
+        }
+
+        function manualUserChange() {
+            activeSelection.batterId = document.getElementById('activeBatter').value;
+            activeSelection.pitcherId = document.getElementById('activePitcher').value;
+            updateCharacters();
+            save();
         }
 
         function updateCharacters() {
-            const bName = (players.find(p => p.id == activeSelection.batterId)?.name || "").toLowerCase();
-            const pName = (players.find(p => p.id == activeSelection.pitcherId)?.name || "").toLowerCase();
-            document.getElementById('batter-sprite-container').innerHTML = bName.includes("beto") ?
-                `<img src="${SPRITES.heman}" class="character-sprite">` : (bName.includes("nasa") ? `<img src="${SPRITES.skeletor}" class="character-sprite">` : "");
-            document.getElementById('pitcher-sprite-container').innerHTML = pName.includes("nasa") ?
-                `<img src="${SPRITES.skeletor}" class="character-sprite">` : (pName.includes("beto") ? `<img src="${SPRITES.heman}" class="character-sprite">` : "");
+            const bContainer = document.getElementById('batter-sprite-container');
+            const pContainer = document.getElementById('pitcher-sprite-container');
+            
+            const b = players.find(x => x.id == activeSelection.batterId);
+            const p = players.find(x => x.id == activeSelection.pitcherId);
+
+            const getSprite = (name) => {
+                if(!name) return '';
+                const n = name.toLowerCase();
+                if(n.includes('beto')) return `<img src="${SPRITES.heman}" class="character-sprite" alt="Beto">`;
+                if(n.includes('nasa')) return `<img src="${SPRITES.skeletor}" class="character-sprite" alt="Nasa">`;
+                return '👤';
+            };
+
+            bContainer.innerHTML = b ? getSprite(b.name) : '';
+            pContainer.innerHTML = p ? getSprite(p.name) : '';
+        }
+
+        function rotatePlayer(role) {
+            if(players.length < 2) return;
+            if(role === 'batter') {
+                const idx = players.findIndex(x => x.id == activeSelection.batterId);
+                let next = idx + 1;
+                if(next >= players.length) next = 0;
+                activeSelection.batterId = players[next].id;
+                document.getElementById('activeBatter').value = players[next].id;
+            } else {
+                const idx = players.findIndex(x => x.id == activeSelection.pitcherId);
+                let next = idx + 1;
+                if(next >= players.length) next = 0;
+                activeSelection.pitcherId = players[next].id;
+                document.getElementById('activePitcher').value = players[next].id;
+            }
+            updateCharacters();
         }
 
         function toggleGame() {
-            if (!isGameActive) {
-                if (players.length === 0) return showToast("⚠️ ¡Añade jugadores!");
-                isGameActive = true;
-                currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1, bases: { 1: false, 2: false, 3: false } };
+            isGameActive = !isGameActive;
+            if(isGameActive) {
+                showToast("🏁 ¡PARTIDO INICIADO! CONTROL ACTIVO");
             } else {
-                if (!confirm("¿Finalizar partido?")) return;
-                isGameActive = false;
+                showToast("🔒 PARTIDO EN PAUSA");
             }
             save();
         }
 
         function updateStatusUI() {
-            const controls = document.getElementById('game-controls');
-            const btn = document.getElementById('btn-toggle-game');
             const indicator = document.getElementById('game-status-indicator');
-            if (isGameActive) {
+            const controls = document.getElementById('game-controls');
+            const btnText = document.getElementById('game-btn-text');
+            const btnIcon = document.getElementById('game-btn-icon');
+            const btn = document.getElementById('btn-toggle-game');
+
+            if(isGameActive) {
+                indicator.innerText = "🔴 EN JUEGO - EN VIVO";
+                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-600 text-white animate-pulse border border-red-500 w-fit";
                 controls.classList.remove('opacity-30', 'pointer-events-none');
-                document.getElementById('game-btn-text').innerText = "FINALIZAR PARTIDO";
-                btn.classList.replace('bg-emerald-700', 'bg-rose-950/80');
-                indicator.innerText = "• PARTIDO EN VIVO •";
-                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 w-fit";
+                btnText.innerText = "PAUSAR PARTIDO";
+                btnIcon.innerText = "⏸️";
+                btn.className = "px-8 py-3 bg-amber-700 hover:bg-amber-600 text-white rounded-full font-black text-lg shadow-lg transform transition-all active:scale-95 flex items-center gap-3";
             } else {
+                indicator.innerText = "💤 PARTIDO PAUSADO / ESPERANDO";
+                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-slate-800 text-slate-400 border border-slate-700 w-fit";
+                controls.add('opacity-30', 'pointer-events-none');
                 controls.classList.add('opacity-30', 'pointer-events-none');
-                document.getElementById('game-btn-text').innerText = "EMPEZAR PARTIDO";
-                btn.classList.replace('bg-rose-950/80', 'bg-emerald-700');
-                indicator.innerText = "ESPERANDO PARTIDO";
-                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-300 border border-red-500/30 w-fit";
+                btnText.innerText = "EMPEZAR PARTIDO";
+                btnIcon.innerText = "🏏";
+                btn.className = "px-8 py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-full font-black text-lg shadow-lg transform transition-all active:scale-95 flex items-center gap-3";
             }
+        }
+
+        function addPlayer() {
+            const input = document.getElementById('playerNameInput');
+            const name = input.value.trim();
+            if(!name) return;
+            
+            const newP = {
+                id: Date.now().toString(),
+                name: name,
+                stats: { atBats: 0, hits: 0, hr: 0, rbi: 0, pk: 0, pruns: 0, outs: 0, h2b: 0, h3b: 0, bb: 0, k_received: 0, hits_allowed: 0, bb_allowed: 0, uer: 0, stolen_bases: 0, caught_stealing: 0, outs_on_base: 0, pitcher_errors: 0, caught_stealing_pitcher: 0 }
+            };
+
+            players.push(newP);
+            input.value = '';
+            save();
+            showToast(`👤 ${name.toUpperCase()} AÑADIDO`);
         }
 
         function renderPlayerList() {
             document.getElementById('playerList').innerHTML = players.map(p => `
                 <div class="flex justify-between p-3 bg-slate-800 rounded-xl mb-2 border border-slate-700">
                     <span>👤 ${p.name}</span>
-                    <button onclick="removePlayer(${p.id})" class="text-red-400">✕</button>
+                    <button onclick="removePlayer(${p.id})\" class="text-red-400">✕</button>
                 </div>`).join('');
         }
 
@@ -704,12 +777,12 @@
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
             document.getElementById('section-' + id).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-blue-600', 'text-white'));
+            document.getElementById('nav-' + id).add('bg-blue-600', 'text-white');
             document.getElementById('nav-' + id).classList.add('bg-blue-600', 'text-white');
         }
         function clearHistory() { if(confirm("¿BORRAR TODO?")) { players = []; isGameActive = false; historyLogs = { batting: [], pitching: [] }; save(); } }
         function showHR() { const ov = document.getElementById('hr-overlay'); ov.style.display = 'flex'; setTimeout(() => ov.style.display = 'none', 3500); }
-        function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.remove('opacity-0', 'translate-y-24'); setTimeout(() => t.classList.add('opacity-0', 'translate-y-24'), 2500); }
-        window.onload = () => viewSection('game');
+        function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.classList.remove('opacity-0', 'translate-y-24'); t.classList.add('opacity-100', 'translate-y-0'); setTimeout(() => { t.classList.remove('opacity-100', 'translate-y-0'); t.classList.add('opacity-0', 'translate-y-24'); }, 3000); }
     </script>
 </body>
 </html>
