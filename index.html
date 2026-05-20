@@ -6,11 +6,11 @@
     <title>MLB THE SHOW 26 COOP - STATS PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght=400;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; transition: background-color 0.3s; overflow-x: hidden; }
         .card { background-color: #1e293b; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .btn-primary { background: linear-gradient(135deg, #3b82f6, #2563eb); transition: all 0.2s; }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+        .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); transition: all 0.2s; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4); }
         .scoreboard-font { font-family: 'Courier New', Courier, monospace; }
         
         #hr-overlay {
@@ -29,22 +29,34 @@
         .hr-text {
             font-size: 5rem;
             font-weight: 900;
-            color: #fde047;
-            text-shadow: 0 0 20px #fde047, 0 0 40px #eab308;
-            animation: hr-bounce 0.5s infinite alternate;
+            color: #fbbf24;
+            text-shadow: 0 0 20px #fbbf24, 0 0 40px #d97706;
         }
-        @keyframes hr-bounce { from { transform: scale(1); } to { transform: scale(1.05); } }
 
         .out-dot { width: 14px; height: 14px; border-radius: 9999px; transition: all 0.3s; border: 2px solid rgba(255,255,255,0.1); }
         .character-sprite { width: 60px; height: 60px; object-fit: contain; filter: drop-shadow(0 0 5px rgba(255,255,255,0.3)); }
         
-        /* Diamante de Bases */
-        .diamond-container { position: relative; width: 80px; height: 80px; transform: rotate(45deg); margin: 10px; }
-        .base-pad { position: absolute; width: 18px; height: 18px; border: 2px solid #475569; background-color: #334155; transition: all 0.3s; }
-        .base-1 { top: 0; right: 0; }
-        .base-2 { top: 0; left: 0; }
-        .base-3 { bottom: 0; left: 0; }
-        .base-active { background-color: #fde047; border-color: #eab308; box-shadow: 0 0 8px #fde047; }
+        /* Estilos de botones con degradados notorios y ordenados */
+        .gradient-hit { background: linear-gradient(135deg, #10b981, #059669); color: white; border: 1px solid #047857; }
+        .gradient-hit:hover { background: linear-gradient(135deg, #059669, #047857); }
+        
+        .gradient-power { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: 1px solid #b45309; }
+        .gradient-power:hover { background: linear-gradient(135deg, #d97706, #b45309); }
+        
+        .gradient-support { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: 1px solid #1d4ed8; }
+        .gradient-support:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+        
+        .gradient-special { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; border: 1px solid #6d28d9; }
+        .gradient-special:hover { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+
+        .gradient-neutral { background: linear-gradient(135deg, #64748b, #475569); color: #f1f5f9; border: 1px solid #334155; }
+        .gradient-neutral:hover { background: linear-gradient(135deg, #475569, #334155); }
+
+        .gradient-out { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; border: 1px solid #b91c1c; }
+        .gradient-out:hover { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+
+        .gradient-baserunning { background: linear-gradient(135deg, #ec4899, #db2777); color: white; border: 1px solid #be185d; }
+        .gradient-baserunning:hover { background: linear-gradient(135deg, #db2777, #be185d); }
 
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: #1e293b; }
@@ -62,7 +74,7 @@
     <div class="max-w-6xl mx-auto">
         <header class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <div>
-                <h1 class="text-3xl font-extrabold text-white tracking-tight">MLB THE SHOW <span class="text-blue-400">26 COOP</span></h1>
+                <h1 class="text-3xl font-extrabold text-white tracking-tight">MLB THE SHOW <span class="text-blue-500">26 COOP</span></h1>
                 <p class="text-slate-400 font-medium italic">Beto vs Nasa Edition</p>
             </div>
             <div class="flex gap-2 bg-slate-800 p-1 rounded-xl">
@@ -72,40 +84,18 @@
             </div>
         </header>
 
-        <div id="live-scoreboard" class="card p-5 mb-6 border-b-4 border-blue-500 flex flex-col md:flex-row justify-between items-center bg-slate-900 data-slate-900 gap-6">
+        <div id="live-scoreboard" class="card p-5 mb-6 border-b-4 border-blue-600 flex flex-col md:flex-row justify-between items-center bg-slate-900 gap-6">
             <div class="flex flex-col gap-3 w-full md:w-auto">
-                <div id="game-status-indicator" class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-300 border border-red-500/30 w-fit">
+                <div id="game-status-indicator" class="px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/50 w-fit">
                     ESPERANDO PARTIDO
                 </div>
-                <div class="flex gap-8 items-center">
+                <div class="flex gap-8">
                     <div>
-                        <p class="text-[10px] text-blue-300 font-black uppercase mb-2 tracking-tighter">
-                            Inning <span id="display-inning" class="text-white ml-1">1</span> <span id="display-part" class="text-yellow-200 ml-1">ALTA</span>
-                        </p>
-                        <div class="flex flex-col gap-1 mb-2">
-                            <p class="text-[9px] text-slate-400 font-bold uppercase">Outs Bat: <span id="text-outs-bat" class="text-white font-mono">0</span></p>
-                            <div id="bat-outs" class="flex gap-1">
-                                <div class="out-dot bg-slate-700"></div>
-                                <div class="out-dot bg-slate-700"></div>
-                                <div class="out-dot bg-slate-700"></div>
-                            </div>
-                        </div>
-                        <div class="flex flex-col gap-1">
-                            <p class="text-[9px] text-slate-400 font-bold uppercase">Outs Pitch: <span id="text-outs-pitch" class="text-white font-mono">0</span></p>
-                            <div id="pitch-outs" class="flex gap-1">
-                                <div class="out-dot bg-slate-700"></div>
-                                <div class="out-dot bg-slate-700"></div>
-                                <div class="out-dot bg-slate-700"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col items-center bg-slate-800/30 p-2 rounded-xl border border-slate-700/50">
-                        <p class="text-[9px] text-yellow-400 font-black uppercase tracking-tighter mb-1">Bases</p>
-                        <div class="diamond-container">
-                            <div id="base-1" class="base-pad base-1" title="1ra Base" onclick="manualToggleBase(1)"></div>
-                            <div id="base-2" class="base-pad base-2" title="2da Base" onclick="manualToggleBase(2)"></div>
-                            <div id="base-3" class="base-pad base-3" title="3ra Base" onclick="manualToggleBase(3)"></div>
+                        <p class="text-[10px] text-blue-400 font-black uppercase mb-2 tracking-tighter">Outs Inning <span id="display-inning" class="text-white ml-2">1</span></p>
+                        <div id="bat-outs" class="flex gap-2">
+                            <div class="out-dot bg-slate-700"></div>
+                            <div class="out-dot bg-slate-700"></div>
+                            <div class="out-dot bg-slate-700"></div>
                         </div>
                     </div>
                 </div>
@@ -113,12 +103,12 @@
             
             <div class="flex gap-8 md:gap-12 items-center bg-slate-800/50 px-8 py-4 rounded-2xl border border-slate-700">
                 <div class="text-center">
-                    <p class="text-[10px] text-blue-300 font-black uppercase mb-1">Anotadas</p>
+                    <p class="text-[10px] text-blue-400 font-black uppercase mb-1">Anotadas</p>
                     <span id="score-runs" class="scoreboard-font text-5xl text-white">0</span>
                 </div>
                 <div class="text-slate-600 text-3xl font-black">VS</div>
                 <div class="text-center">
-                    <p class="text-[10px] text-red-300 font-black uppercase mb-1">Permitidas</p>
+                    <p class="text-[10px] text-red-500 font-black uppercase mb-1">Permitidas</p>
                     <span id="score-allowed" class="scoreboard-font text-5xl text-white">0</span>
                 </div>
             </div>
@@ -126,78 +116,72 @@
 
         <section id="section-game" class="space-y-6">
             <div class="flex flex-col sm:flex-row justify-center gap-4 mb-4">
-                <button id="btn-toggle-game" onclick="toggleGame()" class="px-8 py-3 bg-emerald-700 hover:bg-emerald-600 text-white rounded-full font-black text-lg shadow-lg transform transition-all active:scale-95 flex items-center gap-3">
+                <button id="btn-toggle-game" onclick="toggleGame()" class="px-8 py-3 bg-green-600 hover:bg-green-500 text-white rounded-full font-black text-lg shadow-lg transform transition-all active:scale-95 flex items-center gap-3">
                     <span id="game-btn-icon">🏏</span> <span id="game-btn-text">EMPEZAR PARTIDO</span>
                 </button>
             </div>
 
             <div id="game-controls" class="opacity-30 pointer-events-none transition-all duration-300 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="card p-6 border-t-4 border-blue-400">
+                <div class="card p-6 border-t-4 border-blue-500">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-slate-200">🏏 Ofensiva - Lineup</h2>
+                        <h2 class="text-xl font-bold">🏏 Lineup</h2>
                         <div id="batter-sprite-container" class="h-16 flex items-center"></div>
                     </div>
-                    <select id="activeBatter" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-blue-400"></select>
+                    <select id="activeBatter" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-blue-500"></select>
                     
                     <div class="grid grid-cols-3 gap-2">
-                        <button onclick="recordBatting('H', '#a7f3d0')" class="p-3 bg-emerald-900/40 text-emerald-200 border border-emerald-700/50 rounded-lg font-bold hover:bg-emerald-800/40 transition-colors">1B (Hit)</button>
-                        <button onclick="recordBatting('2B', '#99f6e4')" class="p-3 bg-teal-900/40 text-teal-200 border border-teal-700/50 rounded-lg font-bold hover:bg-teal-800/40 transition-colors">2B</button>
-                        <button onclick="recordBatting('3B', '#ffedd5')" class="p-3 bg-orange-950/40 text-orange-200 border border-orange-800/40 rounded-lg font-bold hover:bg-orange-900/40 transition-colors">3B</button>
+                        <button onclick="recordBatting('H', '#10b981')" class="p-3 gradient-hit rounded-lg font-bold">1B</button>
+                        <button onclick="recordBatting('2B', '#059669')" class="p-3 gradient-hit rounded-lg font-bold">2B</button>
+                        <button onclick="recordBatting('3B', '#f59e0b')" class="p-3 gradient-power rounded-lg font-bold">3B</button>
                         
-                        <button onclick="recordBatting('HR', '#fef08a')" class="p-3 bg-yellow-950/60 text-yellow-200 border-2 border-yellow-600/60 rounded-lg font-black hover:bg-yellow-900/60 transition-colors shadow-sm">⭐ HR</button>
-                        <button onclick="recordBatting('BB', '#bfdbfe')" class="p-3 bg-blue-950/50 text-blue-200 border border-blue-700/50 rounded-lg font-bold hover:bg-blue-900/40 transition-colors">BB (Walk)</button>
-                        <button onclick="recordBatting('RBI', '#f3e8ff')" class="p-3 bg-purple-950/50 text-purple-200 border border-purple-700/50 rounded-lg font-bold hover:bg-purple-900/40 transition-colors">🎯 RBI (+1)</button>
+                        <button onclick="recordBatting('HR', '#d97706')" class="p-3 gradient-power rounded-lg font-bold">HR</button>
+                        <button onclick="recordBatting('BB', '#3b82f6')" class="p-3 gradient-support rounded-lg font-bold">BB</button>
+                        <button onclick="recordBatting('RBI', '#8b5cf6')" class="p-3 gradient-special rounded-lg font-bold">RBI</button>
                         
-                        <button onclick="recordBatting('OUT', '#cbd5e1')" class="p-3 bg-slate-800 text-slate-400 border border-slate-700 rounded-lg font-medium hover:bg-slate-700 text-xs uppercase">Fly / Ground</button>
-                        <button onclick="recordBatting('K', '#fecaca')" class="p-3 bg-red-950/50 text-red-300 border border-red-800/40 rounded-lg font-bold hover:bg-red-900/40 text-sm">K Recibido</button>
-                        <button onclick="recordBatting('E', '#94a3b8')" class="p-3 bg-slate-800/60 text-slate-400 border border-slate-700/60 rounded-lg font-medium hover:bg-slate-700 text-xs">Error Bat</button>
-                        
-                        <button onclick="recordBatting('BR', '#cffafe')" class="p-3 bg-cyan-950/50 text-cyan-200 border border-cyan-800/50 rounded-lg font-bold hover:bg-cyan-900/40 text-xs">🏃‍♂️ BASE ROBADA</button>
-                        <button onclick="recordBatting('OR', '#ffe4e6')" class="p-3 bg-rose-950/40 text-rose-300 border border-rose-800/40 rounded-lg font-bold hover:bg-rose-900/40 text-xs">🛑 OUT ROBANDO</button>
-                        <button onclick="recordBatting('OC', '#fca5a5')" class="p-3 bg-rose-950/60 text-rose-200 border border-rose-700 rounded-lg font-black hover:bg-rose-900/60 text-xs">⚠️ OUT CARRERA</button>
+                        <button onclick="recordBatting('OUT', '#64748b')" class="p-3 gradient-neutral rounded-lg font-bold text-xs uppercase">Fly/Ground</button>
+                        <button onclick="recordBatting('K', '#ef4444')" class="p-3 gradient-out rounded-lg font-bold">K-Recibido</button>
+                        <button onclick="recordBatting('E', '#475569')" class="p-3 gradient-neutral rounded-lg font-bold text-xs">ERR-B</button>
+
+                        <button onclick="recordBatting('BR', '#ec4899')" class="p-3 gradient-baserunning rounded-lg font-bold text-xs col-span-1">🏃‍♂️ ROBO</button>
+                        <button onclick="recordBatting('OC', '#be185d')" class="p-3 gradient-baserunning rounded-lg font-bold text-xs col-span-2">🛑 OUT CARRERA</button>
                     </div>
                 </div>
 
-                <div class="card p-6 border-t-4 border-red-400">
+                <div class="card p-6 border-t-4 border-red-500">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-xl font-bold text-slate-200">⚾ Defensiva - Bullpen</h2>
+                        <h2 class="text-xl font-bold">⚾ Bullpen <span id="p-era-live" class="text-xs text-red-400 ml-2"></span></h2>
                         <div id="pitcher-sprite-container" class="h-16 flex items-center"></div>
                     </div>
-                    <select id="activePitcher" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-red-400"></select>
+                    <select id="activePitcher" onchange="manualUserChange()" class="w-full p-4 mb-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-black text-xl outline-none focus:border-red-500"></select>
                     
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="recordPitching('K', '#fca5a5')" class="p-3 bg-red-950/60 text-red-200 border border-red-700/60 rounded-xl font-bold hover:bg-red-900/50 transition-colors">🔥 PONCHE (K)</button>
-                        <button onclick="recordPitching('OUT', '#cbd5e1')" class="p-3 bg-slate-800 text-slate-300 border border-slate-700 rounded-xl font-bold hover:bg-slate-700 transition-colors">OUT (Contacto)</button>
-                        
-                        <button onclick="recordPitching('HIT', '#ffedd5')" class="p-3 bg-orange-950/30 text-orange-300 border border-orange-800/40 rounded-xl font-bold hover:bg-orange-900/30">HIT Recibido</button>
-                        <button onclick="recordPitching('BB', '#bfdbfe')" class="p-3 bg-blue-950/30 text-blue-300 border border-blue-800/40 rounded-xl font-bold hover:bg-blue-900/30">BB (Caminado)</button>
-                        
-                        <button onclick="recordPitching('ER', '#ffe4e6')" class="p-3 bg-rose-950/30 text-rose-300 border border-rose-900/30 rounded-xl font-medium hover:bg-rose-900/40">Carrera Limpia</button>
-                        <button onclick="recordPitching('UER', '#e2e8f0')" class="p-3 bg-slate-800 text-slate-400 border border-slate-700 rounded-xl font-medium hover:bg-slate-700">Carrera Sucia</button>
-                        
-                        <button onclick="recordPitching('AR', '#e0e7ff')" class="p-3 bg-indigo-950/50 text-indigo-200 border border-indigo-800/50 rounded-xl font-bold hover:bg-indigo-900/40 text-xs">⚡ ATRAPADO ROBANDO</button>
-                        <button onclick="recordPitching('E_D', '#fed7aa')" class="p-3 bg-amber-950/50 text-amber-200 border border-amber-800/50 rounded-xl font-bold hover:bg-amber-900/40 text-xs">❌ ERROR DEFENSIVO</button>
+                        <button onclick="recordPitching('K', '#ef4444')" class="p-4 gradient-out rounded-xl font-bold">PONCHE (K)</button>
+                        <button onclick="recordPitching('OUT', '#64748b')" class="p-4 gradient-neutral rounded-xl font-bold">OUT (Contacto)</button>
+                        <button onclick="recordPitching('HIT', '#f59e0b')" class="p-4 gradient-power rounded-xl font-bold">HIT RECIBIDO</button>
+                        <button onclick="recordPitching('BB', '#3b82f6')" class="p-4 gradient-support rounded-xl font-bold">BB-P (Caminado)</button>
+                        <button onclick="recordPitching('ER', '#ef4444')" class="p-4 gradient-out rounded-xl font-bold text-sm">CARRERA LIMPIA</button>
+                        <button onclick="recordPitching('UER', '#475569')" class="p-4 gradient-neutral rounded-xl font-bold text-sm">CARRERA SUCIA</button>
                     </div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="card p-5 bg-slate-900/80 border border-blue-900/30">
-                    <h3 class="text-xs font-black text-blue-400 uppercase mb-4">Eventos Recientes (Bateo)</h3>
+                    <h3 class="text-xs font-black text-blue-500 uppercase mb-4">Eventos Recientes (Bateo)</h3>
                     <div id="battingEvents" class="space-y-2 max-h-60 overflow-y-auto"></div>
                 </div>
                 <div class="card p-5 bg-slate-900/80 border border-red-900/30">
-                    <h3 class="text-xs font-black text-red-400 uppercase mb-4">Eventos Recientes (Pitcheo)</h3>
+                    <h3 class="text-xs font-black text-red-500 uppercase mb-4">Eventos Recientes (Pitcheo)</h3>
                     <div id="pitchingEvents" class="space-y-2 max-h-60 overflow-y-auto"></div>
                 </div>
             </div>
         </section>
 
         <section id="section-stats" class="hidden space-y-8">
-            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-blue-500 pb-2 italic">Dashboard de Jugadores</h2>
+            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-blue-600 pb-2 italic">Dashboard de Jugadores</h2>
             <div id="statsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-6"></div>
             
-            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-red-500 pb-2 italic">Bitácora Completa de Jugadas</h2>
+            <h2 class="text-2xl font-black text-white uppercase border-b-2 border-red-600 pb-2 italic">Bitácora Completa de Jugadas</h2>
             <div class="card overflow-hidden">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-slate-800 text-slate-400 uppercase text-[10px] font-black">
@@ -226,7 +210,7 @@
         </section>
     </div>
 
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-300 bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black z-50 text-center border-4 border-blue-500"></div>
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 transform translate-y-24 opacity-0 transition-all duration-300 bg-white text-slate-900 px-8 py-4 rounded-2xl shadow-2xl font-black z-50 text-center border-4 border-blue-600"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.10.0/firebase-database-compat.js"></script>
@@ -247,7 +231,7 @@
 
         let players = [];
         let isGameActive = false;
-        let currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1, bases: { 1: false, 2: false, 3: false } };
+        let currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
         let historyLogs = { batting: [], pitching: [] };
         let activeSelection = { batterId: "", pitcherId: "" };
         const SPRITES = {
@@ -263,17 +247,12 @@
             const data = snapshot.val();
             if (data) {
                 players = data.players || [];
-                currentGameScore = data.score || { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1, bases: { 1: false, 2: false, 3: false } };
-                if(!currentGameScore.bases) currentGameScore.bases = { 1: false, 2: false, 3: false };
-                if(currentGameScore.pitchOuts === undefined) currentGameScore.pitchOuts = 0;
-                if(currentGameScore.batOuts === undefined) currentGameScore.batOuts = 0;
-                
+                currentGameScore = data.score || { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
                 isGameActive = data.isGameActive || false;
                 historyLogs = data.logs || { batting: [], pitching: [] };
                 activeSelection = data.activeSelection || { batterId: "", pitcherId: "" };
                 if(!historyLogs.batting) historyLogs.batting = [];
                 if(!historyLogs.pitching) historyLogs.pitching = [];
- 
                 updateUI();
             }
         });
@@ -281,30 +260,11 @@
         function updateUI() {
             document.getElementById('score-runs').innerText = currentGameScore.runs;
             document.getElementById('score-allowed').innerText = currentGameScore.allowed;
-            document.getElementById('display-inning').innerText = Math.floor(currentGameScore.inning);
+            document.getElementById('display-inning').innerText = currentGameScore.inning;
             
-            const esAlta = currentGameScore.inning % 1 === 0; 
-            document.getElementById('display-part').innerText = esAlta ? "ALTA" : "BAJA";
-
-            document.getElementById('text-outs-bat').innerText = currentGameScore.batOuts;
             const bDots = document.getElementById('bat-outs').children;
             for(let i=0; i<3; i++) {
-                bDots[i].style.backgroundColor = i < currentGameScore.batOuts ? '#60a5fa' : '#334155';
-            }
-
-            document.getElementById('text-outs-pitch').innerText = currentGameScore.pitchOuts;
-            const pDots = document.getElementById('pitch-outs').children;
-            for(let i=0; i<3; i++) {
-                pDots[i].style.backgroundColor = i < currentGameScore.pitchOuts ? '#f87171' : '#334155';
-            }
-
-            for(let b=1; b<=3; b++) {
-                const element = document.getElementById(`base-${b}`);
-                if(currentGameScore.bases[b]) {
-                    element.classList.add('base-active');
-                } else {
-                    element.classList.remove('base-active');
-                }
+                bDots[i].style.backgroundColor = i < (currentGameScore.pitchOuts || currentGameScore.batOuts) ? '#ef4444' : '#334155';
             }
 
             updateStatusUI();
@@ -316,13 +276,8 @@
             renderFullHistory();
         }
 
-        function manualToggleBase(baseNum) {
-            if(!isGameActive) return;
-            currentGameScore.bases[baseNum] = !currentGameScore.bases[baseNum];
-            save();
-        }
-
-        function getAntecessorIndex(currentId) {
+        // Helper para obtener al jugador anterior que ejecutó la jugada ofensiva base
+        function getPreviousPlayerIndex(currentId) {
             if (players.length < 2) return -1;
             let currentIndex = players.findIndex(p => p.id == currentId);
             let prevIndex = currentIndex - 1;
@@ -333,69 +288,63 @@
         function recordBatting(type, color) {
             const pid = activeSelection.batterId;
             if(!pid) return showToast("⚠️ Selecciona un bateador");
-            const p = players.find(x => x.id == pid);
             
             const timestamp = Date.now();
-            
-            if(!p.stats.stolen_bases) p.stats.stolen_bases = 0;
-            if(!p.stats.caught_stealing) p.stats.caught_stealing = 0;
-            if(!p.stats.outs_on_base) p.stats.outs_on_base = 0;
 
-            if (['H','2B','3B','HR','OUT','K','OC'].includes(type)) p.stats.atBats++;
+            // CASO ESPECIAL: Out en Carrera (OC) -> Se registra al que acaba de embasarse (Jugador anterior en Lineup)
+            if (type === 'OC') {
+                let prevIdx = getPreviousPlayerIndex(pid);
+                if (prevIdx !== -1) {
+                    let targetPlayer = players[prevIdx];
+                    if (!targetPlayer.stats.outs_on_base) targetPlayer.stats.outs_on_base = 0;
+                    
+                    targetPlayer.stats.outs_on_base++; 
+                    currentGameScore.batOuts++;
+                    addLog('batting', targetPlayer.name, 'OUT EN CARRERA', color, timestamp);
+                } else {
+                    // Si solo hay un jugador creado, se le añade a él
+                    const p = players.find(x => x.id == pid);
+                    if (!p.stats.outs_on_base) p.stats.outs_on_base = 0;
+                    p.stats.outs_on_base++;
+                    currentGameScore.batOuts++;
+                    addLog('batting', p.name, 'OUT EN CARRERA', color, timestamp);
+                }
+                
+                // Evaluar si se alcanzaron los 3 outs
+                if (currentGameScore.batOuts >= 3) {
+                    showToast("🛑 3 OUTS - CAMBIO");
+                    currentGameScore.batOuts = 0;
+                }
+                save();
+                return; // Cortamos la ejecución para que no avance el lineup ni cuente como turno al bate
+            }
+
+            // Flujo normal de bateo para el bateador activo
+            const p = players.find(x => x.id == pid);
+            if (!p.stats.outs_on_base) p.stats.outs_on_base = 0;
+            if (!p.stats.stolen_bases) p.stats.stolen_bases = 0;
+
+            if (['H','2B','3B','HR','OUT','K'].includes(type)) p.stats.atBats++;
             if (['H','2B','3B','HR'].includes(type)) p.stats.hits++;
             
-            if (type === '1B' || type === 'H') shiftBases(1);
-            if (type === '2B') { p.stats.h2b = (p.stats.h2b || 0) + 1; shiftBases(2); }
-            if (type === '3B') { p.stats.h3b = (p.stats.h3b || 0) + 1; shiftBases(3); }
-            
-            if (type === 'HR') { 
-                p.stats.hr++; 
-                p.stats.rbi++; 
-                currentGameScore.runs++; 
-                showHR(); 
-                clearBases(); 
-            }
-            
-            if (type === 'BB') { p.stats.bb = (p.stats.bb || 0) + 1; shiftBases(1); }
+            if (type === '2B') p.stats.h2b = (p.stats.h2b || 0) + 1;
+            if (type === '3B') p.stats.h3b = (p.stats.h3b || 0) + 1;
+            if (type === 'HR') { p.stats.hr++; p.stats.rbi++; currentGameScore.runs++; showHR(); }
+            if (type === 'BB') p.stats.bb = (p.stats.bb || 0) + 1;
             if (type === 'K') p.stats.k_received = (p.stats.k_received || 0) + 1;
             if (type === 'RBI') { p.stats.rbi++; currentGameScore.runs++; }
+            if (type === 'BR') p.stats.stolen_bases++; // Robo de base para el jugador activo
             
-            if (type === 'OUT' || type === 'K' || type === 'OC') currentGameScore.batOuts++;
+            if (type === 'OUT' || type === 'K') currentGameScore.batOuts++;
             
-            if (type === 'BR') {
-                let prevIdx = getAntecessorIndex(pid);
-                if (prevIdx !== -1) {
-                    if(!players[prevIdx].stats.stolen_bases) players[prevIdx].stats.stolen_bases = 0;
-                    players[prevIdx].stats.stolen_bases++;
-                    addLog('batting', players[prevIdx].name, 'BR', color, timestamp);
-                } else {
-                    p.stats.stolen_bases++;
-                    addLog('batting', p.name, 'BR', color, timestamp);
-                }
-            } else if (type === 'OR') {
-                currentGameScore.batOuts++;
-                let prevIdx = getAntecessorIndex(pid);
-                if (prevIdx !== -1) {
-                    if(!players[prevIdx].stats.caught_stealing) players[prevIdx].stats.caught_stealing = 0;
-                    players[prevIdx].stats.caught_stealing++;
-                    addLog('batting', players[prevIdx].name, 'OR', color, timestamp);
-                } else {
-                    p.stats.caught_stealing++;
-                    addLog('batting', p.name, 'OR', color, timestamp);
-                }
-            } else if (type === 'OC') {
-                p.stats.outs_on_base++;
-                addLog('batting', p.name, 'OUT EN CARRERA', color, timestamp);
-            } else {
-                addLog('batting', p.name, type, color, timestamp);
-            }
-
-            if (type !== 'RBI' && type !== 'BR' && type !== 'OR' && type !== 'OC') rotatePlayer('batter');
+            addLog('batting', p.name, type === 'BR' ? 'BASE ROBADA' : type, color, timestamp);
+            
+            // Avanzar el lineup si no es una acción secundaria en base
+            if (type !== 'RBI' && type !== 'BR') rotatePlayer('batter');
             
             if (currentGameScore.batOuts >= 3) {
-                showToast("🛑 3 OUTS DE BATEO - CAMBIO");
+                showToast("🛑 3 OUTS - CAMBIO");
                 currentGameScore.batOuts = 0;
-                clearBases();
             }
             save();
         }
@@ -405,63 +354,21 @@
             if(!pid) return showToast("⚠️ Selecciona un pitcher");
             const p = players.find(x => x.id == pid);
 
-            if(!p.stats.pitcher_errors) p.stats.pitcher_errors = 0;
-            if(!p.stats.caught_stealing_pitcher) p.stats.caught_stealing_pitcher = 0;
-
             if (type === 'K') { p.stats.pk++; currentGameScore.pitchOuts++; p.stats.outs = (p.stats.outs || 0) + 1; }
             if (type === 'OUT') { currentGameScore.pitchOuts++; p.stats.outs = (p.stats.outs || 0) + 1; }
             if (type === 'HIT') p.stats.hits_allowed = (p.stats.hits_allowed || 0) + 1;
             if (type === 'BB') p.stats.bb_allowed = (p.stats.bb_allowed || 0) + 1;
             if (type === 'ER') { p.stats.pruns++; currentGameScore.allowed++; }
             if (type === 'UER') { p.stats.uer = (p.stats.uer || 0) + 1; currentGameScore.allowed++; }
-            
-            if (type === 'AR') {
-                p.stats.caught_stealing_pitcher++;
-                currentGameScore.pitchOuts++;
-                p.stats.outs = (p.stats.outs || 0) + 1;
-                addLog('pitching', p.name, 'AR', color, Date.now());
-            } else if (type === 'E_D') {
-                let prevIdx = getAntecessorIndex(pid);
-                if (prevIdx !== -1) {
-                    if(!players[prevIdx].stats.pitcher_errors) players[prevIdx].stats.pitcher_errors = 0;
-                    players[prevIdx].stats.pitcher_errors++;
-                    addLog('pitching', players[prevIdx].name, 'ERR-DEF', color, Date.now());
-                } else {
-                    p.stats.pitcher_errors++;
-                    addLog('pitching', p.name, 'ERR-DEF', color, Date.now());
-                }
-            } else {
-                addLog('pitching', p.name, type, color, Date.now());
-            }
-            
+
+            addLog('pitching', p.name, type, color, Date.now());
             if (currentGameScore.pitchOuts >= 3) {
-                showToast("✅ INNING DE PICHEO TERMINADO");
+                showToast("✅ INNING TERMINADO");
                 currentGameScore.pitchOuts = 0;
-                currentGameScore.inning = currentGameScore.inning + 0.5; 
+                currentGameScore.inning++;
                 rotatePlayer('pitcher');
             }
             save();
-        }
-
-        function shiftBases(numBases) {
-            let currentBases = [currentGameScore.bases[1], currentGameScore.bases[2], currentGameScore.bases[3]];
-            if (numBases === 1) {
-                if (currentBases[0] && currentBases[1]) currentGameScore.bases[3] = true;
-                if (currentBases[0]) currentGameScore.bases[2] = true;
-                currentGameScore.bases[1] = true;
-            } else if (numBases === 2) {
-                if (currentBases[0]) currentGameScore.bases[3] = true;
-                currentGameScore.bases[2] = true;
-                currentGameScore.bases[1] = false;
-            } else if (numBases === 3) {
-                currentGameScore.bases[3] = true;
-                currentGameScore.bases[2] = false;
-                currentGameScore.bases[1] = false;
-            }
-        }
-
-        function clearBases() {
-            currentGameScore.bases = { 1: false, 2: false, 3: false };
         }
 
         function deleteLog(side, timestamp) {
@@ -474,27 +381,24 @@
 
             if(p) {
                 if(side === 'batting') {
-                    if (['H','2B','3B','HR','OUT','K','OC'].includes(log.type)) p.stats.atBats--;
+                    if (['H','2B','3B','HR','OUT','K'].includes(log.type)) p.stats.atBats--;
                     if (['H','2B','3B','HR'].includes(log.type)) p.stats.hits--;
                     if (log.type === '2B') p.stats.h2b--;
                     if (log.type === '3B') p.stats.h3b--;
-                    if (log.type === 'HR') { p.stats.hr--; p.stats.rbi--; currentGameScore.runs = Math.max(0, currentGameScore.runs - 1); }
+                    if (log.type === 'HR') { p.stats.hr--; p.stats.rbi--; currentGameScore.runs--; }
                     if (log.type === 'BB') p.stats.bb--;
                     if (log.type === 'K') p.stats.k_received--;
-                    if (log.type === 'RBI') { p.stats.rbi--; currentGameScore.runs = Math.max(0, currentGameScore.runs - 1); }
-                    if (log.type === 'OUT' || log.type === 'K' || log.type === 'OC') currentGameScore.batOuts = Math.max(0, currentGameScore.batOuts - 1);
-                    if (log.type === 'BR') p.stats.stolen_bases = Math.max(0, p.stats.stolen_bases - 1);
-                    if (log.type === 'OR') { p.stats.caught_stealing = Math.max(0, p.stats.caught_stealing - 1); currentGameScore.batOuts = Math.max(0, currentGameScore.batOuts - 1); }
-                    if (log.type === 'OUT EN CARRERA') p.stats.outs_on_base = Math.max(0, p.stats.outs_on_base - 1);
+                    if (log.type === 'RBI') { p.stats.rbi--; currentGameScore.runs--; }
+                    if (log.type === 'BASE ROBADA') p.stats.stolen_bases--;
+                    if (log.type === 'OUT EN CARRERA') { p.stats.outs_on_base--; currentGameScore.batOuts = Math.max(0, currentGameScore.batOuts - 1); }
+                    if (log.type === 'OUT' || log.type === 'K') currentGameScore.batOuts = Math.max(0, currentGameScore.batOuts - 1);
                 } else {
                     if (log.type === 'K') { p.stats.pk--; currentGameScore.pitchOuts = Math.max(0, currentGameScore.pitchOuts - 1); p.stats.outs--; }
                     if (log.type === 'OUT') { currentGameScore.pitchOuts = Math.max(0, currentGameScore.pitchOuts - 1); p.stats.outs--; }
                     if (log.type === 'HIT') p.stats.hits_allowed--;
                     if (log.type === 'BB') p.stats.bb_allowed--;
-                    if (log.type === 'ER') { p.stats.pruns--; currentGameScore.allowed = Math.max(0, currentGameScore.allowed - 1); }
-                    if (log.type === 'UER') { p.stats.uer--; currentGameScore.allowed = Math.max(0, currentGameScore.allowed - 1); }
-                    if (log.type === 'AR') { p.stats.caught_stealing_pitcher = Math.max(0, p.stats.caught_stealing_pitcher - 1); currentGameScore.pitchOuts = Math.max(0, currentGameScore.pitchOuts - 1); p.stats.outs--; }
-                    if (log.type === 'ERR-DEF') p.stats.pitcher_errors = Math.max(0, p.stats.pitcher_errors - 1);
+                    if (log.type === 'ER') { p.stats.pruns--; currentGameScore.allowed--; }
+                    if (log.type === 'UER') { p.stats.uer--; currentGameScore.allowed--; }
                 }
             }
             historyLogs[side].splice(logIndex, 1);
@@ -505,7 +409,6 @@
             document.getElementById('statsContainer').innerHTML = players.map(p => {
                 const s = p.stats;
                 const avg = s.atBats > 0 ? (s.hits / s.atBats).toFixed(3) : ".000";
-                
                 const h1b = s.hits - (s.h2b||0) - (s.h3b||0) - s.hr;
                 const slug = s.atBats > 0 ? ((h1b + (s.h2b||0)*2 + (s.h3b||0)*3 + s.hr*4) / s.atBats).toFixed(3) : ".000";
                 
@@ -515,7 +418,7 @@
                 const whip = inningsVal > 0 ? (((s.hits_allowed||0) + (s.bb_allowed||0)) / inningsVal).toFixed(2) : "0.00";
 
                 return `
-                <div class="card p-5 border-l-4 ${p.name.toLowerCase().includes('beto') ? 'border-blue-400' : 'border-red-400'}">
+                <div class="card p-5 border-l-4 ${p.name.toLowerCase().includes('beto') ? 'border-blue-500' : 'border-red-500'}">
                     <div class="flex justify-between items-start mb-4">
                         <div>
                             <h3 class="text-xl font-black uppercase text-white">${p.name}</h3>
@@ -550,16 +453,19 @@
                             <p class="text-[9px] text-slate-500 font-bold">BB</p><p class="font-bold">${s.bb||0}</p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-red-400 font-bold">K-REC</p><p class="font-bold">${s.k_received||0}</p>
+                            <p class="text-[9px] text-red-500 font-bold">K-REC</p><p class="font-bold">${s.k_received||0}</p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-slate-500 font-bold">BR / OR</p><p class="font-bold text-cyan-400 text-xs">${s.stolen_bases||0} / <span class="text-rose-400">${s.caught_stealing||0}</span></p>
+                            <p class="text-[9px] text-pink-400 font-bold">🏃‍♂️ ROBO</p><p class="font-bold text-pink-400">${s.stolen_bases||0}</p>
                         </div>
                         <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800">
-                            <p class="text-[9px] text-rose-300 font-bold">Out Carr.</p><p class="font-bold text-xs text-rose-300">${s.outs_on_base||0}</p>
+                            <p class="text-[9px] text-rose-500 font-bold">🛑 OUT C.</p><p class="font-bold text-rose-500">${s.outs_on_base||0}</p>
                         </div>
-                        <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800 col-span-4">
-                            <p class="text-[9px] text-slate-500 font-bold">AB / H</p><p class="font-bold text-xs">${s.atBats} / ${s.hits}</p>
+                        <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800 col-span-2">
+                            <p class="text-[9px] text-slate-500 font-bold">AB</p><p class="font-bold">${s.atBats}</p>
+                        </div>
+                        <div class="bg-slate-900/50 p-2 rounded text-center border border-slate-800 col-span-2">
+                            <p class="text-[9px] text-slate-500 font-bold">H</p><p class="font-bold">${s.hits}</p>
                         </div>
                     </div>
 
@@ -583,7 +489,7 @@
                                 <p class="text-[9px] text-slate-500 uppercase">C. Sucias</p><p class="font-bold text-slate-400">${s.uer||0}</p>
                             </div>
                             <div class="text-center">
-                                <p class="text-[9px] text-slate-400 uppercase">Err Def / AR</p><p class="font-bold text-xs text-amber-400">${s.pitcher_errors||0} / <span class="text-indigo-400">${s.caught_stealing_pitcher||0}</span></p>
+                                <p class="text-[9px] text-slate-500 uppercase">BB-Perm.</p><p class="font-bold text-blue-300">${s.bb_allowed||0}</p>
                             </div>
                         </div>
                     </div>
@@ -636,7 +542,7 @@
             const input = document.getElementById('playerNameInput');
             const name = input.value.trim();
             if (name) {
-                players.push({ id: Date.now(), name, stats: { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0, h2b:0, h3b:0, bb:0, k_received:0, uer:0, outs:0, hits_allowed:0, bb_allowed:0, stolen_bases: 0, caught_stealing: 0, pitcher_errors: 0, caught_stealing_pitcher: 0, outs_on_base: 0 } });
+                players.push({ id: Date.now(), name, stats: { atBats:0, hits:0, hr:0, rbi:0, pk:0, pruns:0, h2b:0, h3b:0, bb:0, k_received:0, uer:0, outs:0, hits_allowed:0, bb_allowed:0, stolen_bases: 0, outs_on_base: 0 } });
                 input.value = ''; save();
             }
         }
@@ -664,7 +570,7 @@
             if (!isGameActive) {
                 if (players.length === 0) return showToast("⚠️ ¡Añade jugadores!");
                 isGameActive = true;
-                currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1, bases: { 1: false, 2: false, 3: false } };
+                currentGameScore = { runs: 0, allowed: 0, pitchOuts: 0, batOuts: 0, inning: 1 };
             } else {
                 if (!confirm("¿Finalizar partido?")) return;
                 isGameActive = false;
@@ -679,15 +585,15 @@
             if (isGameActive) {
                 controls.classList.remove('opacity-30', 'pointer-events-none');
                 document.getElementById('game-btn-text').innerText = "FINALIZAR PARTIDO";
-                btn.classList.replace('bg-emerald-700', 'bg-rose-950/80');
+                btn.classList.replace('bg-green-600', 'bg-red-600');
                 indicator.innerText = "• PARTIDO EN VIVO •";
-                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 w-fit";
+                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-green-500/20 text-green-400 border border-green-500/50 w-fit";
             } else {
                 controls.classList.add('opacity-30', 'pointer-events-none');
                 document.getElementById('game-btn-text').innerText = "EMPEZAR PARTIDO";
-                btn.classList.replace('bg-rose-950/80', 'bg-emerald-700');
+                btn.classList.replace('bg-red-600', 'bg-green-600');
                 indicator.innerText = "ESPERANDO PARTIDO";
-                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-300 border border-red-500/30 w-fit";
+                indicator.className = "px-4 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-red-500/20 text-red-400 border border-red-500/50 w-fit";
             }
         }
 
