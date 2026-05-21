@@ -542,7 +542,31 @@
             gameId = gameId.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '');
         }
         let gameRef = null;
-        // ESTADO DE LA APLICACIÓN
+        // After initializing gameRef and loading data, prompt for password if needed
+function promptPasswordIfNeeded(isNewRoom) {
+    if (isNewRoom) {
+        // New room, ask to set a password
+        const pwd = prompt('Establece una contraseña para esta sala (se guardará en la nube):');
+        if (pwd) {
+            // Store plain password (insecure, but simple demo) under the room node
+            if (gameRef) gameRef.child('password').set(pwd);
+        }
+    } else {
+        // Existing room, ask for password to join
+        const storedPwd = currentRoomPassword; // will be loaded below
+        if (storedPwd) {
+            const attempt = prompt('Introduce la contraseña para entrar a esta sala:');
+            if (attempt !== storedPwd) {
+                alert('Contraseña incorrecta. No puedes unirte a esta sala.');
+                // Redirect back to lobby
+                window.location.href = window.location.pathname;
+                return;
+            }
+        }
+    }
+}
+// Variable to hold password fetched from Firebase
+let currentRoomPassword = null;
         let players = [];
         let isGameActive = false;
         let isMuted = localStorage.getItem('mlb_audio_muted') === 'true';
